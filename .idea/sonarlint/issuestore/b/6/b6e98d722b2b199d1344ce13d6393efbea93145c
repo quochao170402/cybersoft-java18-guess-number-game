@@ -1,0 +1,23 @@
+
+f
+java:S1192."IDefine a constant instead of duplicating this literal "password" 4 times.(ÀÜÜü8³›±û¤0
+d
+java:S11923"GDefine a constant instead of duplicating this literal "errors" 4 times.(ÄıÕı8š»û¤0
+k
+java:S1192-"IDefine a constant instead of duplicating this literal "username" 4 times.(Ö¡Œ‰ûÿÿÿÿ8Ì¹°û¤0
+w
+java:S1989"aHandle the following exceptions that could be thrown by "forward": ServletException, IOException.(ÈÑ¼ã
+w
+java:S1989"aHandle the following exceptions that could be thrown by "forward": ServletException, IOException.(ÈÑ¼ã
+u
+java:S1989"SHandle the following exception that could be thrown by "sendRedirect": IOException.(±æ…»ÿÿÿÿÿ8…‰û–¥0
+‚
+java:S1989&"gHandle the following exceptions that could be thrown by "processSignUp": IOException, ServletException.(íÌ¾…øÿÿÿÿ
+‚
+java:S1989'"gHandle the following exceptions that could be thrown by "processSignIn": IOException, ServletException.(ÚÃÇáşÿÿÿÿ
+u
+java:S1989("SHandle the following exception that could be thrown by "sendRedirect": IOException.(±æ…»ÿÿÿÿÿ8¡¦ü–¥0
+Q
+java:S24412"<Make "Player" serializable or don't store it in the session.(ú¨¢-
+X
+java:S2441G"<Make "Player" serializable or don't store it in the session.(ú¨¢-8İ©´û¤0
