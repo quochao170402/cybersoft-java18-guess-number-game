@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
          pageEncoding="UTF-8" %>
-<%@ page import="cybersoft.javabackend.java18.gamedoanso.utils.UrlUtils" %>
+<%@ page import="cybersoft.javabackend.java18.game.utils.UrlUtils" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!doctype html>
 <html lang="en">
@@ -59,10 +59,10 @@
                 <div class="form-row align-items-center">
                     <button type="submit" class="btn btn-outline-primary btn-lg col-4 offset-4">Đoán</button>
                 </div>
-<%--                <div class="form-row align-items-center">--%>
-<%--&lt;%&ndash;                    <button type="submit" class="btn btn-outline-primary btn-lg col-4 offset-4">Chơi mới</button>&ndash;%&gt;--%>
-<%--                   --%>
-<%--                </div>--%>
+                <%--                <div class="form-row align-items-center">--%>
+                <%--&lt;%&ndash;                    <button type="submit" class="btn btn-outline-primary btn-lg col-4 offset-4">Chơi mới</button>&ndash;%&gt;--%>
+                <%--                   --%>
+                <%--                </div>--%>
                 <a href="<%=request.getContextPath() + UrlUtils.NEW_GAME%>"
                    class="btn btn-outline-primary btn-lg col-4 offset-4 mt-3">Chơi mới</a>
             </form>
@@ -71,52 +71,53 @@
     <div class="row justify-content-center mt-5">
         <div class="col-md-8">
 
-<%--            <c:forEach items="${game.guesses}" var="${guess}">--%>
-<%--                ${guess.gameId}<br>--%>
-<%--                ${guess.number}<br>--%>
-<%--                ${guess.turnResult}<br>--%>
-<%--                ${guess.time}<br>--%>
-<%--            </c:forEach>--%>
+            <%--            <c:forEach items="${game.guesses}" var="${guess}">--%>
+            <%--                ${guess.gameId}<br>--%>
+            <%--                ${guess.number}<br>--%>
+            <%--                ${guess.turnResult}<br>--%>
+            <%--                ${guess.time}<br>--%>
+            <%--            </c:forEach>--%>
 
-
-            <table class="table table-borderless">
-                <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Số đoán</th>
-                    <th scope="col">Kết quả</th>
-                    <th scope="col">Thời gian</th>
-                </tr>
-                </thead>
-                <tbody>
-                <c:forEach items="${guesses}" var="guess" varStatus="loop">
-                    <tr class="table-success">
-                        <th scope="row">${loop.index+1}</th>
-                        <td>${guess.number}</td>
-                        <td>${guess.result}</td>
-                        <td>${guess.getTime()}</td>
+            <c:if test="${guesses.size() != 0}">
+                <table class="table table-borderless">
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Số đoán</th>
+                        <th scope="col">Kết quả</th>
+                        <th scope="col">Thời gian</th>
                     </tr>
-                </c:forEach>
-<%--                <tr class="table-success">--%>
-<%--                    <th scope="row">1</th>--%>
-<%--                    <td>${guess.number}</td>--%>
-<%--                    <td>${guess.result}</td>--%>
-<%--                    <td>${guess.time}</td>--%>
-<%--                </tr>--%>
-<%--                <tr class="table-danger">--%>
-<%--                    <th scope="row">2</th>--%>
-<%--                    <td>225</td>--%>
-<%--                    <td>Số bạn đoán lớn hơn kết quả.</td>--%>
-<%--                    <td>27/11/1991 19:19:20</td>--%>
-<%--                </tr>--%>
-<%--                <tr class="table-warning">--%>
-<%--                    <th scope="row">3</th>--%>
-<%--                    <td>113</td>--%>
-<%--                    <td>Số bạn đoán bé hơn kết quả.</td>--%>
-<%--                    <td>27/11/1991 19:19:20</td>--%>
-<%--                </tr>--%>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                    <c:forEach items="${guesses}" var="guess" varStatus="loop">
+                        <tr class="table-success">
+                            <th scope="row">${loop.index+1}</th>
+                            <td>${guess.number}</td>
+                            <td>${guess.result}</td>
+                            <td>${guess.getTimeFormatted()}</td>
+                        </tr>
+                    </c:forEach>
+                        <%--                <tr class="table-success">--%>
+                        <%--                    <th scope="row">1</th>--%>
+                        <%--                    <td>${guess.number}</td>--%>
+                        <%--                    <td>${guess.result}</td>--%>
+                        <%--                    <td>${guess.time}</td>--%>
+                        <%--                </tr>--%>
+                        <%--                <tr class="table-danger">--%>
+                        <%--                    <th scope="row">2</th>--%>
+                        <%--                    <td>225</td>--%>
+                        <%--                    <td>Số bạn đoán lớn hơn kết quả.</td>--%>
+                        <%--                    <td>27/11/1991 19:19:20</td>--%>
+                        <%--                </tr>--%>
+                        <%--                <tr class="table-warning">--%>
+                        <%--                    <th scope="row">3</th>--%>
+                        <%--                    <td>113</td>--%>
+                        <%--                    <td>Số bạn đoán bé hơn kết quả.</td>--%>
+                        <%--                    <td>27/11/1991 19:19:20</td>--%>
+                        <%--                </tr>--%>
+                    </tbody>
+                </table>
+            </c:if>
         </div>
     </div>
 </div>
