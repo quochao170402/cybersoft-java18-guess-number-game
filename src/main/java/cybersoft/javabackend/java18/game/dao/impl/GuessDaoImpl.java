@@ -51,9 +51,9 @@ public class GuessDaoImpl implements GuessDao {
     }
 
     @Override
-    public boolean insert(Guess guess) {
+    public void insert(Guess guess) {
         if (connection == null){
-            return false;
+            return ;
         }
 
         String query = "insert into guess(id, number, result, game, player, time) " +
@@ -66,9 +66,7 @@ public class GuessDaoImpl implements GuessDao {
             statement.setString(4,guess.getGameId());
             statement.setString(5,guess.getUsername());
             statement.setTimestamp(6, Timestamp.valueOf(guess.getTime()));
-            return statement.executeUpdate() != 0;
-        } catch (SQLException e) {
-            return false;
+        } catch (SQLException ignored) {
         }
 
     }

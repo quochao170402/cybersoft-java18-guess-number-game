@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface GuessDao {
     List<Guess> findByGameId(String id);
-    boolean insert(Guess guess);
+    void insert(Guess guess);
 }

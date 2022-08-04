@@ -44,8 +44,8 @@ public class PlayerDaoImpl implements PlayerDao {
                         result.getString("name"))
                 );
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException ignored) {
+            return null;
         }
         return players.size() == 0 ? null : players.get(0);
     }

@@ -69,10 +69,10 @@ public class GameServlet extends HttpServlet {
         // put guess to request
         req.setAttribute("guesses", currentGame.getGuesses());
         req.getRequestDispatcher(JspUtils.GAME).forward(req, resp);
-//        resp.sendRedirect(req.getContextPath() + UrlUtils.GAME);
     }
 
     private void ranking(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // get sorted game list
         List<GameSession> gameSessions = GameService.getService().ranking();
         request.setAttribute("games", gameSessions);
         request.getRequestDispatcher(JspUtils.RANK).forward(request, response);

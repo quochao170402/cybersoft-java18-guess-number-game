@@ -23,9 +23,9 @@ public class GameSessionDaoImpl implements GameSessionDao {
     }
 
     @Override
-    public boolean insert(GameSession gameSession) {
+    public void insert(GameSession gameSession) {
         if (connection == null) {
-            return false;
+            return;
         }
 
         String query = "insert into game(id, target_number, complete, active, start_time, end_time, player) " +
@@ -42,9 +42,7 @@ public class GameSessionDaoImpl implements GameSessionDao {
                     gameSession.getEndTime() == null ?
                     null : Timestamp.valueOf(gameSession.getEndTime()));
             statement.setString(7,gameSession.getUsername());
-            return statement.executeUpdate() != 0;
-        } catch (SQLException e) {
-            return false;
+        } catch (SQLException ignored) {
         }
     }
 

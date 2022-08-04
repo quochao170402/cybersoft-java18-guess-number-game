@@ -14,8 +14,8 @@ public class GameSessionRepository {
         dao = GameSessionDaoImpl.getInstance();
     }
 
-    public boolean save(GameSession gameSession) {
-        return dao.insert(gameSession);
+    public void save(GameSession gameSession) {
+        dao.insert(gameSession);
     }
 
     public List<GameSession> findByUsername(String username) {
