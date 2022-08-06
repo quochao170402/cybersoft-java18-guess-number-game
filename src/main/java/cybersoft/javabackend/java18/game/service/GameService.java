@@ -6,6 +6,9 @@ import cybersoft.javabackend.java18.game.model.Player;
 import cybersoft.javabackend.java18.game.repository.GameSessionRepository;
 import cybersoft.javabackend.java18.game.repository.GuessRepository;
 import cybersoft.javabackend.java18.game.repository.PlayerRepository;
+import cybersoft.javabackend.java18.game.repository.impl.GameSessionRepositoryImpl;
+import cybersoft.javabackend.java18.game.repository.impl.GuessRepositoryImpl;
+import cybersoft.javabackend.java18.game.repository.impl.PlayerRepositoryImpl;
 
 import java.util.Comparator;
 import java.util.List;
@@ -20,9 +23,9 @@ public class GameService {
 
 
     private GameService() {
-        this.gameSessionRepository = new GameSessionRepository();
-        this.playerRepository = new PlayerRepository();
-        this.guessRepository = new GuessRepository();
+        this.gameSessionRepository = GameSessionRepositoryImpl.getRepository();
+        this.playerRepository = PlayerRepositoryImpl.getRepository();
+        this.guessRepository = GuessRepositoryImpl.getRepository();
         indexId = gameSessionRepository.count() + 1;
 
     }
@@ -36,6 +39,7 @@ public class GameService {
 
     /**
      * Sign in method to get a user from store by username and password
+     *
      * @param username player username
      * @param password player password
      * @return a Player instance if found or null
@@ -51,9 +55,10 @@ public class GameService {
 
     /**
      * Sign up method to add new player to store if not existed
+     *
      * @param username player username
      * @param password player password
-     * @param name player name
+     * @param name     player name
      * @return a Player instance if user input is valid and not duplicate or null
      */
     public Player signUp(String username, String password, String name) {
@@ -67,7 +72,7 @@ public class GameService {
         Player player = new Player(username, password, name);
 
         // save player to store
-        if (playerRepository.save(player)){
+        if (playerRepository.insert(player)) {
             return player;
         }
 
@@ -76,9 +81,10 @@ public class GameService {
 
     /**
      * method check validation user input
+     *
      * @param username player username
      * @param password player password
-     * @param name player name
+     * @param name     player name
      * @return true if valid or false
      */
     private boolean isValidPlayer(String username, String password, String name) {
@@ -97,6 +103,7 @@ public class GameService {
     /**
      * Method to create new game and deactivate all other
      * game of player by username then save game to store
+     *
      * @param username username of player need create new game
      * @return new game instance
      */
@@ -108,12 +115,13 @@ public class GameService {
         gameSessionRepository.deactivateAllGameByUsername(username);
 
         // save game to store
-        gameSessionRepository.save(gameSession);
+        gameSessionRepository.insert(gameSession);
         return gameSession;
     }
 
     /**
      * Method to get the player's active games by username
+     *
      * @param username player username
      * @return current active player's game
      */
@@ -137,6 +145,7 @@ public class GameService {
 
     /**
      * Get all finished games and sort it by game's guess and complete time
+     *
      * @return sorted game list
      */
     public List<GameSession> ranking() {
@@ -144,51 +153,51 @@ public class GameService {
         List<GameSession> games = gameSessionRepository.findFinishedGames();
         games.forEach(game -> game.getGuesses().addAll(guessRepository.findByGameId(game.getId())));
         // sort list by number of game's guess and time to complete game
-       return games.stream()
-               .sorted((game, other) -> new GameComparator().compare(game,other))
-               .toList();
-    }
-
-    private static class GameComparator implements Comparator<GameSession>{
-
-        @Override
-        public int compare(GameSession o1, GameSession o2) {
-            if (o1.getGuesses().size() > o2.getGuesses().size()){
-                return 1;
-            }else if (o1.getGuesses().size() < o2.getGuesses().size()){
-                return -1;
-            }else{
-                return Float.compare(o1.getTime(), o2.getTime());
-            }
-        }
+        return games.stream()
+                .sorted((game, other) -> new GameComparator().compare(game, other))
+                .toList();
     }
 
     public Guess guessNumber(GameSession currentGame, int number) {
         // guess number and save guess to db
         int targetNumber = currentGame.getTargetNumber();
-        Guess guess = new Guess(currentGame.getId(),currentGame.getUsername(),number);
+        Guess guess = new Guess(currentGame.getId(), number);
 
         // Check user number with target number
-        if (targetNumber == number){
+        if (targetNumber == number) {
             guess.setResult(GuessResult.CORRECT);
             currentGame.finished();
-            gameSessionRepository.finished(currentGame);
-        }else if (targetNumber < number){
+            gameSessionRepository.finishedGameById(currentGame.getId());
+        } else if (targetNumber < number) {
             guess.setResult(GuessResult.GREATER);
-        }else {
+        } else {
             guess.setResult(GuessResult.LESSER);
         }
 
         // add guess to game's guess list
-        currentGame.getGuesses().add(0,guess);
+        currentGame.getGuesses().add(0, guess);
 
         // save guess to db
-        guessRepository.save(guess);
+        guessRepository.insert(guess);
         return guess;
     }
 
     public List<Guess> findByGameId(String id) {
         return guessRepository.findByGameId(id);
+    }
+
+    private static class GameComparator implements Comparator<GameSession> {
+
+        @Override
+        public int compare(GameSession o1, GameSession o2) {
+            if (o1.getGuesses().size() > o2.getGuesses().size()) {
+                return 1;
+            } else if (o1.getGuesses().size() < o2.getGuesses().size()) {
+                return -1;
+            } else {
+                return Float.compare(o1.getTime(), o2.getTime());
+            }
+        }
     }
 
     public static class GuessResult {

@@ -30,13 +30,13 @@ public class GameServlet extends HttpServlet {
             throws ServletException, IOException {
         switch (request.getServletPath()) {
             case UrlUtils.GAME -> {
-                gameProcess(request,response);
+                loadGame(request,response);
             }
             case UrlUtils.RANK -> {
-                ranking(request,response);
+                processRanking(request,response);
             }
             case UrlUtils.NEW_GAME -> {
-                playNewGame(request,response);
+                processNewGame(request,response);
             }
             default -> response.sendRedirect(JspUtils.NOT_FOUND);
         }
@@ -45,10 +45,11 @@ public class GameServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        processGuess(req,resp);
+        processGame(req,resp);
     }
 
-    private void gameProcess(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    // Load current game or create new game
+    private void loadGame(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Player currentPlayer = (Player) request.getSession().getAttribute("currentUser");
         GameSession currentGame = service.getCurrentGame(currentPlayer.getUsername());
         request.setAttribute("game", currentGame);
@@ -56,7 +57,7 @@ public class GameServlet extends HttpServlet {
         request.getRequestDispatcher(JspUtils.GAME).forward(request, response);
     }
 
-    private void processGuess(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    private void processGame(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // get current player from request and player's active game in store
         Player currentPlayer = (Player) req.getSession().getAttribute("currentUser");
         GameSession currentGame = service.getCurrentGame(currentPlayer.getUsername());
@@ -71,14 +72,14 @@ public class GameServlet extends HttpServlet {
         req.getRequestDispatcher(JspUtils.GAME).forward(req, resp);
     }
 
-    private void ranking(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void processRanking(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // get sorted game list
         List<GameSession> gameSessions = GameService.getService().ranking();
         request.setAttribute("games", gameSessions);
         request.getRequestDispatcher(JspUtils.RANK).forward(request, response);
     }
 
-    private void playNewGame(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void processNewGame(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // get current game
         Player currentPlayer = (Player) request.getSession().getAttribute("currentUser");
         GameSession currentGame = service.getCurrentGame(currentPlayer.getUsername());

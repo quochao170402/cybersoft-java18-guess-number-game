@@ -1,40 +1,21 @@
 package cybersoft.javabackend.java18.game.repository;
 
-import cybersoft.javabackend.java18.game.dao.GameSessionDao;
-import cybersoft.javabackend.java18.game.dao.impl.GameSessionDaoImpl;
 import cybersoft.javabackend.java18.game.model.GameSession;
 
 import java.util.List;
 
-public class GameSessionRepository {
+public interface GameSessionRepository {
+    void insert(GameSession gameSession);
 
-    private final GameSessionDao dao;
+    List<GameSession> findByUsername(String username);
 
-    public GameSessionRepository() {
-        dao = GameSessionDaoImpl.getInstance();
-    }
+    List<GameSession> findFinishedGames();
 
-    public void save(GameSession gameSession) {
-        dao.insert(gameSession);
-    }
+    void deactivateAllGameByUsername(String username);
 
-    public List<GameSession> findByUsername(String username) {
-        return dao.findByUsername(username);
-    }
+    void finishedGameById(String id);
 
-    public List<GameSession> findFinishedGames() {
-        return dao.findFinishedGame();
-    }
+    int count();
 
-    public void deactivateAllGameByUsername(String username){
-        dao.deactivateAllGameByUsername(username);
-    }
 
-    public int count() {
-        return dao.count();
-    }
-
-    public void finished(GameSession gameSession) {
-        dao.finishedGame(gameSession);
-    }
 }
