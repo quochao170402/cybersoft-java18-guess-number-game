@@ -1,21 +1,26 @@
 package cybersoft.javabackend.java18.game.repository.impl;
 
-import cybersoft.javabackend.java18.game.config.MySQLConnection;
+import cybersoft.javabackend.java18.game.mapper.GameSessionMapper;
+import cybersoft.javabackend.java18.game.mapper.RowMapper;
 import cybersoft.javabackend.java18.game.model.GameSession;
 import cybersoft.javabackend.java18.game.repository.GameSessionRepository;
+import cybersoft.javabackend.java18.game.utils.JspUtils;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GameSessionRepositoryImpl implements GameSessionRepository {
+public class GameSessionRepositoryImpl extends AbstractRepository<GameSession> implements GameSessionRepository {
 
     private static GameSessionRepository repository = null;
+    private RowMapper<GameSession> mapper;
 
     private GameSessionRepositoryImpl() {
+        mapper = new GameSessionMapper();
     }
 
     public static GameSessionRepository getRepository() {
@@ -25,161 +30,126 @@ public class GameSessionRepositoryImpl implements GameSessionRepository {
 
     @Override
     public void insert(GameSession gameSession) {
-        /* JDBC Connection */
-        // create a connection to database
-        try (Connection connection = MySQLConnection.getConnection()) {
+        executeUpdate(connection -> {
             // write query to insert game session to database
             String query = """
-                    insert into game_session(id, target, username)
-                    values (?, ?, ?);
+                    insert into game_session
+                    (id, target, start_time, completed, active, username)
+                    values(?, ?, ?, ?, ?, ?)
                     """;
 
-            // create a prepared statement to execute query
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, gameSession.getId());
             statement.setInt(2, gameSession.getTargetNumber());
-            statement.setString(3, gameSession.getUsername());
-
-        } catch (SQLException e) {
-            throw new RuntimeException(
-                    String.format("Error while connecting database: %s", e.getMessage())
+            statement.setTimestamp(3, Timestamp.from(
+                    gameSession.getStartTime().toInstant(ZoneOffset.of("+07:00")))
             );
-        }
+            statement.setBoolean(4, gameSession.isCompleted());
+            statement.setBoolean(5, gameSession.isActive());
+            statement.setString(6, gameSession.getUsername());
+
+            return statement.executeUpdate();
+        });
     }
 
     @Override
     public List<GameSession> findByUsername(String username) {
         /* JDBC Connection */
-        // create a connection to database
-        try (Connection connection = MySQLConnection.getConnection()) {
+        return executeQuery(connection -> {
             // write query to find games by username
             String query = """
-                    select *
+                    select id, target, start_time, end_time, completed, active, username
                     from game_session
                     where username = ?;
                     """;
 
-            // create prepared statement to execute query
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, username);
 
-            // get result set
             ResultSet results = statement.executeQuery();
             List<GameSession> gameSessions = new ArrayList<>();
             while (results.next()) {
-                gameSessions.add(new GameSession(
-                        results.getString("id"),
-                        results.getInt("target_number"),
-                        results.getTimestamp("start_time").toLocalDateTime(),
-                        results.getTimestamp("end_time") == null ?
-                                null : results.getTimestamp("end_time").toLocalDateTime(),
-                        results.getBoolean("complete"),
-                        results.getBoolean("active"),
-                        username
-                ));
+                gameSessions.add(mapper.map(results));
             }
-
             return gameSessions;
-        } catch (SQLException e) {
-            throw new RuntimeException(
-                    String.format("Error while connecting database: %s", e.getMessage())
-            );
-        }
+        });
     }
 
     @Override
-    public List<GameSession> findFinishedGames() {
+    public List<GameSession> rankingByPagination(int page) {
         /* JDBC Connection */
-        // create a connection to database
-        try (Connection connection = MySQLConnection.getConnection()) {
+        return executeQuery(connection -> {
             // write query to find completed games
             String query = """
-                    select *
-                    from game_session
-                    where completed = 1;
+                    select id, target, start_time, end_time, username, completed, active
+                    from ranking
+                    where completed = 1
+                    limit ? offset ?
                     """;
-
             // create prepared statement to execute query
             PreparedStatement statement = connection.prepareStatement(query);
+            statement.setInt(1, JspUtils.DEFAULT_PAGE_SIZE);
+            statement.setInt(2, (page - 1) * JspUtils.DEFAULT_PAGE_SIZE);
 
             // get result set
             ResultSet results = statement.executeQuery();
             List<GameSession> gameSessions = new ArrayList<>();
             while (results.next()) {
-                gameSessions.add(new GameSession(
-                        results.getString("id"),
-                        results.getInt("target_number"),
-                        results.getTimestamp("start_time").toLocalDateTime(),
-                        results.getTimestamp("end_time").toLocalDateTime(),
-                        results.getBoolean("complete"),
-                        results.getBoolean("active"),
-                        results.getString("username")
-                ));
+                gameSessions.add(mapper.map(results));
             }
-
             return gameSessions;
-        } catch (SQLException e) {
-            throw new RuntimeException(
-                    String.format("Error while connecting database: %s", e.getMessage())
-            );
-        }
+        });
     }
 
     @Override
-
     public void deactivateAllGameByUsername(String username) {
         /* JDBC Connection */
         // Create a connection to database
-        try (Connection connection = MySQLConnection.getConnection()) {
+        executeUpdate(connection -> {
             // write query to deactivate all games by username
             String query = """
                     update game_session
                     set active = 0
                     where username = ?;
                     """;
-
             // create prepared statement to execute query
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, username);
 
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(
-                    String.format("Error while connecting database: %s", e.getMessage())
-            );
-        }
+            return statement.executeUpdate();
+        });
     }
 
     @Override
     public void finishedGameById(String id) {
         /* JDBC Connection */
         // Create a connection to database
-        try (Connection connection = MySQLConnection.getConnection()) {
-            // write query to finished game by game id
+        executeUpdate(connection -> {
+            // write query to completed game by game id
             String query = """
                     update game_session
                     set active = 0,
-                    completed = 1
+                    completed = 1,
+                    end_time = ?
                     where id = ?;
                     """;
 
             // create prepared statement to execute query
             PreparedStatement statement = connection.prepareStatement(query);
-            statement.setString(1, id);
+            statement.setTimestamp(1, Timestamp.from(
+                    LocalDateTime.now().toInstant(ZoneOffset.of("+07:00"))));
+            statement.setString(2, id);
 
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(
-                    String.format("Error while connecting database: %s", e.getMessage())
-            );
-        }
+            return statement.executeUpdate();
+        });
     }
 
+    // how implement count method using abstract repository
     @Override
     public int count() {
         /* JDBC Connection */
         // create a connection to database
-        try (Connection connection = MySQLConnection.getConnection()) {
+        return executeCountRecord(connection -> {
             // write query to count number of games
             String query = """
                     select count(*)
@@ -194,10 +164,24 @@ public class GameSessionRepositoryImpl implements GameSessionRepository {
             if (results.next()) {
                 return results.getInt(1);
             } else return 0;
-        } catch (SQLException e) {
-            throw new RuntimeException(
-                    String.format("Error while connecting database: %s", e.getMessage())
-            );
-        }
+        });
+    }
+
+    @Override
+    public int getRankSize() {
+        return executeCountRecord(connection -> {
+            // write query to count number of game in rank view
+            String query = """
+                    select count(*) as size
+                    from ranking
+                    """;
+            PreparedStatement statement = connection.prepareStatement(query);
+
+            // get result from result set
+            ResultSet results = statement.executeQuery();
+            if (results.next()) {
+                return results.getInt("size");
+            } else return 0;
+        });
     }
 }

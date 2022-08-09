@@ -9,6 +9,9 @@ public class UrlUtils {
     public static final String INTERNAL_ERROR = "/500";
     public static final String ALL = "/*";
     public static final String ROOT = "/";
-    public static final String LOG_OUT = "/dang-xuat" ;
+    public static final String LOG_OUT = "/dang-xuat";
     public static final String NEW_GAME = "/new-game";
+    public static final String PAGE = "/page";
+    public static final String PREV = "/prev";
+    public static final String NEXT = "/next";
 }

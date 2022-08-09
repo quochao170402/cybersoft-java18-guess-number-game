@@ -1,4 +1,5 @@
 <%@ page import="cybersoft.javabackend.java18.game.utils.UrlUtils" %>
+<%@ page import="cybersoft.javabackend.java18.game.utils.JspUtils" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
          pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
@@ -50,6 +51,29 @@
             </c:forEach>
             </tbody>
         </table>
+        <nav aria-label="Page navigation example">
+            <form action="<%=request.getContextPath() + UrlUtils.RANK%>" method="post" class="pagination">
+
+                <input type="hidden" value="${currentPage}" name="currentPage">
+
+                <li class="page-item">
+                    <input type="submit" class="page-link" value="Previous"
+                           name="pagination" ${currentPage == 1 ? 'disabled': ''} >
+                </li>
+
+                <%--                <c:forEach begin="1" end="${size}" var="page">--%>
+                <%--                    <li class="page-item">--%>
+                <%--                        <input type="submit" class="page-link" value="${page}" name="page">--%>
+                <%--                    </li>--%>
+                <%--                </c:forEach>--%>
+
+                <li class="page-item">
+                    <input type="submit" class="page-link" value="Next"
+                           name="pagination" ${currentPage == totalPage ? 'disabled' : ''}>
+                </li>
+            </form>
+        </nav>
+
     </table>
 </div>
 <!-- Optional JavaScript -->
@@ -64,3 +88,20 @@
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
         crossorigin="anonymous"></script>
 </body>
+
+</html><%--
+<nav aria-label="Page navigation example">
+            <ul class="pagination">
+                <li class="page-item"><a class="page-link"
+                                         href="<%=request.getContextPath() + UrlUtils.PREV%>">Previous</a></li>
+                <c:forEach begin="1" end="10" var="index" varStatus="loop">
+                    <li class="page-item"><a class="page-link"
+                                             href="<%=request.getContextPath() + UrlUtils.PAGE%>">${index}</a>
+                    </li>
+                </c:forEach>
+                <li class="page-item"><a class="page-link"
+                                         href="<%=request.getContextPath() + UrlUtils.NEXT%>">Next</a>
+                </li>
+            </ul>
+        </nav>
+--%>

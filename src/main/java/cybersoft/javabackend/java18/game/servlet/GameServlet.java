@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
-@WebServlet(name = "gameServlet", urlPatterns = {UrlUtils.GAME, UrlUtils.NEW_GAME,UrlUtils.RANK})
+@WebServlet(name = "gameServlet", urlPatterns = {UrlUtils.GAME, UrlUtils.NEW_GAME, UrlUtils.RANK})
 public class GameServlet extends HttpServlet {
 
     private GameService service;
@@ -30,13 +30,14 @@ public class GameServlet extends HttpServlet {
             throws ServletException, IOException {
         switch (request.getServletPath()) {
             case UrlUtils.GAME -> {
-                loadGame(request,response);
+                loadGame(request, response);
             }
             case UrlUtils.RANK -> {
-                processRanking(request,response);
+                request.setAttribute("currentPage", 1);
+                processRanking(request, response, 1);
             }
             case UrlUtils.NEW_GAME -> {
-                processNewGame(request,response);
+                processNewGame(request, response);
             }
             default -> response.sendRedirect(JspUtils.NOT_FOUND);
         }
@@ -45,7 +46,26 @@ public class GameServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        processGame(req,resp);
+        switch (req.getServletPath()) {
+            case UrlUtils.GAME -> {
+                loadGame(req, resp);
+            }
+            case UrlUtils.RANK -> {
+                String currentPage = req.getParameter("currentPage");
+                if (currentPage != null) {
+                    int page = Integer.parseInt(currentPage);
+
+                    if (req.getParameter("pagination").equalsIgnoreCase("previous")) {
+                        processRanking(req, resp, page - 1);
+                    } else {
+                        processRanking(req, resp, page + 1);
+                    }
+                } else {
+                    processRanking(req, resp, 1);
+                }
+            }
+            default -> resp.sendRedirect(JspUtils.NOT_FOUND);
+        }
     }
 
     // Load current game or create new game
@@ -53,7 +73,6 @@ public class GameServlet extends HttpServlet {
         Player currentPlayer = (Player) request.getSession().getAttribute("currentUser");
         GameSession currentGame = service.getCurrentGame(currentPlayer.getUsername());
         request.setAttribute("game", currentGame);
-        request.setAttribute("guesses",currentGame.getGuesses());
         request.getRequestDispatcher(JspUtils.GAME).forward(request, response);
     }
 
@@ -68,24 +87,22 @@ public class GameServlet extends HttpServlet {
         service.guessNumber(currentGame, number);
 
         // put guess to request
-        req.setAttribute("guesses", currentGame.getGuesses());
+        req.setAttribute("game", currentGame);
         req.getRequestDispatcher(JspUtils.GAME).forward(req, resp);
     }
 
-    private void processRanking(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void processRanking(HttpServletRequest request, HttpServletResponse response, int page) throws ServletException, IOException {
         // get sorted game list
-        List<GameSession> gameSessions = GameService.getService().ranking();
+        List<GameSession> gameSessions = service.rankingByPagination(page);
+        request.setAttribute("totalPage", Math.round(service.getSizeOfRank() * 1.0 / JspUtils.DEFAULT_PAGE_SIZE));
         request.setAttribute("games", gameSessions);
+        request.setAttribute("currentPage", page);
         request.getRequestDispatcher(JspUtils.RANK).forward(request, response);
     }
 
     private void processNewGame(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // get current game
         Player currentPlayer = (Player) request.getSession().getAttribute("currentUser");
-        GameSession currentGame = service.getCurrentGame(currentPlayer.getUsername());
-
-        // deactivate current game
-        currentGame.setActive(false);
 
         // create new game
         GameSession newGame = service.createGame(currentPlayer.getUsername());

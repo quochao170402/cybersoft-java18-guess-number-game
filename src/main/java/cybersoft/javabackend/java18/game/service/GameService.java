@@ -139,7 +139,7 @@ public class GameService {
                         .orElseGet(() -> createGame(username));
         // get guesses and add to this game
         List<Guess> guesses = guessRepository.findByGameId(activeGameSession.getId());
-        activeGameSession.getGuesses().addAll(guesses);
+        activeGameSession.setGuesses(guesses);
         return activeGameSession;
     }
 
@@ -148,30 +148,36 @@ public class GameService {
      *
      * @return sorted game list
      */
-    public List<GameSession> ranking() {
-        // get all game from store
-        List<GameSession> games = gameSessionRepository.findFinishedGames();
-        games.forEach(game -> game.getGuesses().addAll(guessRepository.findByGameId(game.getId())));
-        // sort list by number of game's guess and time to complete game
-        return games.stream()
-                .sorted((game, other) -> new GameComparator().compare(game, other))
-                .toList();
+    public List<GameSession> rankingByPagination(int page) {
+        // get all completed game
+        List<GameSession> games = gameSessionRepository.rankingByPagination(page);
+
+        // get guesses for games
+        games.forEach(game -> game.setGuesses(guessRepository.findByGameId(game.getId())));
+
+        return games;
+    }
+
+    public int getSizeOfRank() {
+        return gameSessionRepository.getRankSize();
     }
 
     public Guess guessNumber(GameSession currentGame, int number) {
         // guess number and save guess to db
         int targetNumber = currentGame.getTargetNumber();
-        Guess guess = new Guess(currentGame.getId(), number);
+        Guess guess = new Guess(currentGame.getId(), number, 0);
 
         // Check user number with target number
         if (targetNumber == number) {
-            guess.setResult(GuessResult.CORRECT);
+            guess.setResult(0);
+
+            // update finished game and deactivate it.
             currentGame.finished();
             gameSessionRepository.finishedGameById(currentGame.getId());
         } else if (targetNumber < number) {
-            guess.setResult(GuessResult.GREATER);
+            guess.setResult(1);
         } else {
-            guess.setResult(GuessResult.LESSER);
+            guess.setResult(-1);
         }
 
         // add guess to game's guess list
@@ -180,10 +186,6 @@ public class GameService {
         // save guess to db
         guessRepository.insert(guess);
         return guess;
-    }
-
-    public List<Guess> findByGameId(String id) {
-        return guessRepository.findByGameId(id);
     }
 
     private static class GameComparator implements Comparator<GameSession> {

@@ -42,43 +42,40 @@
         </ul>
     </div>
 </nav>
+<div class="mt-2 mr-5 float-right">
+    <div class="form-row align-items-center">
+        <a href="<%=request.getContextPath() + UrlUtils.NEW_GAME%>" type="submit"
+           class="btn btn-outline-success btn-lg">GAME MỚI</a>
+    </div>
+</div>
 <div class="container">
     <div class="row justify-content-center mt-5">
-        <div class="col-md-8">
+        <div class="col-md-8" ${game.isCompleted() ? 'hidden': ''}>
             <h2 class="text text-primary text-center">MỜI BẠN ĐOÁN SỐ</h2>
         </div>
+        <div class="col-md-8" ${game.isCompleted() ? '': 'hidden'}>
+            <h2 class="text text-success text-center">PINGO!!! PINGO!!! PINGO!!!</h2>
+        </div>
     </div>
+
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <form action="<%=request.getContextPath() + UrlUtils.GAME%>" method="post">
+            <form action="<%=request.getContextPath() + UrlUtils.GAME%>"
+                  method="post" ${game.isCompleted() ? 'hidden': ''}>
                 <div class="form-group form-row">
                     <label for="number"></label>
-                    <input type="number" class="form-control form-control-lg text-center col-4 offset-4"
-                           min="1" max="1000" id="number" name="number" required>
+                    <input type="number" name="number" class="form-control form-control-lg text-center col-4 offset-4"
+                           id="number" required ${game.isCompleted() ? 'readonly': ''}>
                 </div>
                 <div class="form-row align-items-center">
                     <button type="submit" class="btn btn-outline-primary btn-lg col-4 offset-4">Đoán</button>
                 </div>
-                <%--                <div class="form-row align-items-center">--%>
-                <%--&lt;%&ndash;                    <button type="submit" class="btn btn-outline-primary btn-lg col-4 offset-4">Chơi mới</button>&ndash;%&gt;--%>
-                <%--                   --%>
-                <%--                </div>--%>
-                <a href="<%=request.getContextPath() + UrlUtils.NEW_GAME%>"
-                   class="btn btn-outline-primary btn-lg col-4 offset-4 mt-3">Chơi mới</a>
             </form>
         </div>
     </div>
     <div class="row justify-content-center mt-5">
         <div class="col-md-8">
-
-            <%--            <c:forEach items="${game.guesses}" var="${guess}">--%>
-            <%--                ${guess.gameId}<br>--%>
-            <%--                ${guess.number}<br>--%>
-            <%--                ${guess.turnResult}<br>--%>
-            <%--                ${guess.time}<br>--%>
-            <%--            </c:forEach>--%>
-
-            <c:if test="${guesses.size() != 0}">
+            <c:if test="${game.guesses.size() != 0}">
                 <table class="table table-borderless">
                     <thead>
                     <tr>
@@ -89,32 +86,35 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <c:forEach items="${guesses}" var="guess" varStatus="loop">
-                        <tr class="table-success">
-                            <th scope="row">${loop.index+1}</th>
-                            <td>${guess.number}</td>
-                            <td>${guess.result}</td>
-                            <td>${guess.getTimeFormatted()}</td>
-                        </tr>
+
+                    <c:forEach items="${game.guesses}" var="guess" varStatus="loop">
+                        <c:choose>
+                            <c:when test="${guess.result == 0}">
+                                <tr class="table-success">
+                                    <th scope="row">${loop.index+1}</th>
+                                    <td>${guess.number}</td>
+                                    <td>PINGO!!!!</td>
+                                    <td>${guess.getTimeFormatted()}</td>
+                                </tr>
+                            </c:when>
+                            <c:when test="${guess.result == -1}">
+                                <tr class="table-warning">
+                                    <th scope="row">${loop.index+1}</th>
+                                    <td>${guess.number}</td>
+                                    <td>Số của bạn nhỏ hơn số ngẫu nhiên</td>
+                                    <td>${guess.getTimeFormatted()}</td>
+                                </tr>
+                            </c:when>
+                            <c:otherwise>
+                                <tr class="table-danger">
+                                    <th scope="row">${loop.index+1}</th>
+                                    <td>${guess.number}</td>
+                                    <td>Số của bạn lớn hơn số ngẫu nhiên</td>
+                                    <td>${guess.getTimeFormatted()}</td>
+                                </tr>
+                            </c:otherwise>
+                        </c:choose>
                     </c:forEach>
-                        <%--                <tr class="table-success">--%>
-                        <%--                    <th scope="row">1</th>--%>
-                        <%--                    <td>${guess.number}</td>--%>
-                        <%--                    <td>${guess.result}</td>--%>
-                        <%--                    <td>${guess.time}</td>--%>
-                        <%--                </tr>--%>
-                        <%--                <tr class="table-danger">--%>
-                        <%--                    <th scope="row">2</th>--%>
-                        <%--                    <td>225</td>--%>
-                        <%--                    <td>Số bạn đoán lớn hơn kết quả.</td>--%>
-                        <%--                    <td>27/11/1991 19:19:20</td>--%>
-                        <%--                </tr>--%>
-                        <%--                <tr class="table-warning">--%>
-                        <%--                    <th scope="row">3</th>--%>
-                        <%--                    <td>113</td>--%>
-                        <%--                    <td>Số bạn đoán bé hơn kết quả.</td>--%>
-                        <%--                    <td>27/11/1991 19:19:20</td>--%>
-                        <%--                </tr>--%>
                     </tbody>
                 </table>
             </c:if>

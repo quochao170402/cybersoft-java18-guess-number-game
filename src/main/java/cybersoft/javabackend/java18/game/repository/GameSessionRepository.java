@@ -9,13 +9,13 @@ public interface GameSessionRepository {
 
     List<GameSession> findByUsername(String username);
 
-    List<GameSession> findFinishedGames();
-
     void deactivateAllGameByUsername(String username);
 
     void finishedGameById(String id);
 
     int count();
 
+    List<GameSession> rankingByPagination(int page);
 
+    public int getRankSize();
 }

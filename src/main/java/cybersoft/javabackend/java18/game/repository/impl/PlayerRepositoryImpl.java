@@ -1,19 +1,20 @@
 package cybersoft.javabackend.java18.game.repository.impl;
 
-import cybersoft.javabackend.java18.game.config.MySQLConnection;
+import cybersoft.javabackend.java18.game.mapper.PlayerMapper;
 import cybersoft.javabackend.java18.game.model.Player;
 import cybersoft.javabackend.java18.game.repository.PlayerRepository;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class PlayerRepositoryImpl implements PlayerRepository {
+public class PlayerRepositoryImpl extends AbstractRepository<Player> implements PlayerRepository {
     private static PlayerRepository repository = null;
+    private PlayerMapper mapper;
 
     private PlayerRepositoryImpl() {
-
+        mapper = new PlayerMapper();
     }
 
     public static PlayerRepository getRepository() {
@@ -25,7 +26,7 @@ public class PlayerRepositoryImpl implements PlayerRepository {
     public Player findByUsername(String username) {
         /* JDBC connection*/
         // create a connection to database
-        try (Connection connection = MySQLConnection.getConnection()) {
+        return executeQuerySingle(connection -> {
             // write query to find player by username
             String query = """
                     select username, password, name
@@ -40,22 +41,16 @@ public class PlayerRepositoryImpl implements PlayerRepository {
             // return value from result set
             ResultSet results = statement.executeQuery();
             if (results.next()) {
-                return new Player(results.getString("username"),
-                        results.getString("password"),
-                        results.getString("name"));
+                return mapper.map(results);
             } else return null;
-        } catch (SQLException e) {
-            throw new RuntimeException(
-                    String.format("Error while connecting database: %s", e.getMessage())
-            );
-        }
+        });
     }
 
     @Override
     public boolean existedByUsername(String username) {
         /* JDBC connection */
         // create a connection to database
-        try (Connection connection = MySQLConnection.getConnection()) {
+        return executeQuerySingle(connection -> {
             // write query to check player was existed by username
             String query = """
                     select username
@@ -67,20 +62,19 @@ public class PlayerRepositoryImpl implements PlayerRepository {
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, username);
 
-            return statement.executeQuery().next();
-        } catch (SQLException e) {
-            throw new RuntimeException(
-                    String.format("Error while connecting database: %s", e.getMessage())
-            );
-        }
+            // return value from result set
+            ResultSet results = statement.executeQuery();
+            if (results.next()) {
+                return new Player();
+            } else return null;
+        }) != null;
     }
 
     @Override
     public boolean insert(Player player) {
         /* JDBC connection */
         // create a connection to database
-        try (Connection connection = MySQLConnection.getConnection()) {
-
+        return executeUpdate(connection -> {
             // write query to insert player to database
             String query = """
                     insert into player(username, password, name)
@@ -94,11 +88,24 @@ public class PlayerRepositoryImpl implements PlayerRepository {
             statement.setString(3, player.getName());
 
             // execute prepared statement
-            return statement.executeUpdate() != 0;
-        } catch (SQLException e) {
-            throw new RuntimeException(
-                    String.format("Error while connecting database: %s", e.getMessage())
-            );
-        }
+            return statement.executeUpdate();
+        }) != 0;
+    }
+
+    @Override
+    public List<Player> getAll() {
+        return executeQuery(connection -> {
+            String query = """
+                    select * from player;
+                    """;
+
+            PreparedStatement statement = connection.prepareStatement(query);
+            ResultSet results = statement.executeQuery();
+            List<Player> players = new ArrayList<>();
+            while (results.next()) {
+                players.add(mapper.map(results));
+            }
+            return players;
+        });
     }
 }

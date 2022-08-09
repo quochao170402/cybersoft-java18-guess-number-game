@@ -1,24 +1,23 @@
 package cybersoft.javabackend.java18.game.model;
 
 import java.io.Serializable;
-import java.text.DecimalFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 public class GameSession implements Serializable {
-    private final int targetNumber;
+    private int targetNumber;
+    private String id;
+    private LocalDateTime startTime;
+    private String username; // username
     private Random random = null;
-    private final String id;
     private List<Guess> guesses;
-    private final LocalDateTime startTime;
     private LocalDateTime endTime;
     private boolean isCompleted;
     private boolean isActive;
-    private final String username; // username
+    private int guessesSize;
 
     public GameSession(String username, int indexId) {
         this.id = "GAME" + String.format("%05d", indexId);
@@ -30,17 +29,8 @@ public class GameSession implements Serializable {
         isCompleted = false;
     }
 
-    public GameSession( String id, int targetNumber, LocalDateTime startTime,
-                       LocalDateTime endTime, boolean isCompleted,
-                       boolean isActive, String username) {
-        this.targetNumber = targetNumber;
-        this.id = id;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.isCompleted = isCompleted;
-        this.isActive = isActive;
-        this.username = username;
-        this.guesses = new ArrayList<>();
+    public GameSession() {
+
     }
 
     private int getRandomInt() {
@@ -58,12 +48,17 @@ public class GameSession implements Serializable {
         return guesses;
     }
 
-    public float getTime() {
-        return (float) Duration.between(startTime,endTime).getSeconds()/60;
+    public void setGuesses(List<Guess> guesses) {
+        this.guesses = guesses;
     }
 
-    public String getTimeFormatted(){
-        return String.format("%.2f",getTime());
+
+    public float getTime() {
+        return (float) Duration.between(startTime, endTime).getSeconds() / 60;
+    }
+
+    public String getTimeFormatted() {
+        return String.format("%.2f", getTime());
     }
 
     public void finished() {
@@ -109,10 +104,43 @@ public class GameSession implements Serializable {
                 ", isCompleted=" + isCompleted +
                 ", isActive=" + isActive +
                 ", username='" + username + '\'' +
-                '}'+"\n";
+                '}' + "\n";
     }
 
-    public void setGuesses(List<Guess> guesses) {
-        this.guesses = guesses;
+    // fluent style api
+    public GameSession id(String id) {
+        this.id = id;
+        return this;
     }
+
+    public GameSession targetNumber(int targetNumber) {
+        this.targetNumber = targetNumber;
+        return this;
+    }
+
+    public GameSession startTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+        return this;
+    }
+
+    public GameSession endTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+        return this;
+    }
+
+    public GameSession isCompleted(boolean isCompleted) {
+        this.isCompleted = isCompleted;
+        return this;
+    }
+
+    public GameSession isActive(boolean isActive) {
+        this.isActive = isActive;
+        return this;
+    }
+
+    public GameSession username(String username) {
+        this.username = username;
+        return this;
+    }
+
 }
