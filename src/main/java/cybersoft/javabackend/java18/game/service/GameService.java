@@ -10,7 +10,6 @@ import cybersoft.javabackend.java18.game.repository.impl.GameSessionRepositoryIm
 import cybersoft.javabackend.java18.game.repository.impl.GuessRepositoryImpl;
 import cybersoft.javabackend.java18.game.repository.impl.PlayerRepositoryImpl;
 
-import java.util.Comparator;
 import java.util.List;
 
 public class GameService {
@@ -19,6 +18,8 @@ public class GameService {
     private final GameSessionRepository gameSessionRepository;
     private final PlayerRepository playerRepository;
     private final GuessRepository guessRepository;
+
+    // total player in database. using it to set game session id
     private int indexId;
 
 
@@ -26,7 +27,7 @@ public class GameService {
         this.gameSessionRepository = GameSessionRepositoryImpl.getRepository();
         this.playerRepository = PlayerRepositoryImpl.getRepository();
         this.guessRepository = GuessRepositoryImpl.getRepository();
-        indexId = gameSessionRepository.count() + 1;
+        indexId = gameSessionRepository.getNumberOfRecordGameSessionTable() + 1;
 
     }
 
@@ -38,7 +39,7 @@ public class GameService {
     }
 
     /**
-     * Sign in method to get a user from store by username and password
+     * Sign in method to get a user from database by username and password
      *
      * @param username player username
      * @param password player password
@@ -54,7 +55,7 @@ public class GameService {
     }
 
     /**
-     * Sign up method to add new player to store if not existed
+     * Sign up method to add new player to database if not existed
      *
      * @param username player username
      * @param password player password
@@ -66,6 +67,7 @@ public class GameService {
 
         // check player existed
         boolean existedPlayer = playerRepository.existedByUsername(username);
+
         if (existedPlayer)
             return null;
 
@@ -80,7 +82,7 @@ public class GameService {
     }
 
     /**
-     * method check validation user input
+     * Validate user input
      *
      * @param username player username
      * @param password player password
@@ -101,11 +103,11 @@ public class GameService {
     }
 
     /**
-     * Method to create new game and deactivate all other
-     * game of player by username then save game to store
+     * Create new game and deactivate all other
+     * game of player by username then save game to database
      *
      * @param username username of player need create new game
-     * @return new game instance
+     * @return new game session
      */
     public GameSession createGame(String username) {
         GameSession gameSession = new GameSession(username, indexId++);
@@ -120,15 +122,14 @@ public class GameService {
     }
 
     /**
-     * Method to get the player's active games by username
+     * Get the active game by username, if not found create a new game
      *
-     * @param username player username
-     * @return current active player's game
+     * @param username player's username
+     * @return current active game of player
      */
     public GameSession getCurrentGame(String username) {
         List<GameSession> gameSessions = gameSessionRepository.findByUsername(username);
 
-        //pseudocode
         //get current active game, if there's no game -> create new one
         GameSession activeGameSession =
                 gameSessions.size() == 0
@@ -137,6 +138,7 @@ public class GameService {
                         .filter(GameSession::isActive)
                         .findFirst()
                         .orElseGet(() -> createGame(username));
+
         // get guesses and add to this game
         List<Guess> guesses = guessRepository.findByGameId(activeGameSession.getId());
         activeGameSession.setGuesses(guesses);
@@ -144,13 +146,14 @@ public class GameService {
     }
 
     /**
-     * Get all finished games and sort it by game's guess and complete time
+     * Ranking completed game by game's guess and complete time with pagination
      *
+     * @param page Current page need get data
      * @return sorted game list
      */
     public List<GameSession> rankingByPagination(int page) {
-        // get all completed game
-        List<GameSession> games = gameSessionRepository.rankingByPagination(page);
+        // get completed games with pagination
+        List<GameSession> games = gameSessionRepository.rankingWithPagination(page);
 
         // get guesses for games
         games.forEach(game -> game.setGuesses(guessRepository.findByGameId(game.getId())));
@@ -158,8 +161,13 @@ public class GameService {
         return games;
     }
 
+    /**
+     * Method get size of records in view ranking to calculate total page
+     *
+     * @return size of records
+     */
     public int getSizeOfRank() {
-        return gameSessionRepository.getRankSize();
+        return gameSessionRepository.getNumberOfRecordRankingView();
     }
 
     public Guess guessNumber(GameSession currentGame, int number) {
@@ -173,38 +181,15 @@ public class GameService {
 
             // update finished game and deactivate it.
             currentGame.finished();
-            gameSessionRepository.finishedGameById(currentGame.getId());
+            gameSessionRepository.completedGameById(currentGame.getId());
         } else if (targetNumber < number) {
             guess.setResult(1);
         } else {
             guess.setResult(-1);
         }
 
-        // add guess to game's guess list
-        currentGame.getGuesses().add(0, guess);
-
         // save guess to db
         guessRepository.insert(guess);
         return guess;
-    }
-
-    private static class GameComparator implements Comparator<GameSession> {
-
-        @Override
-        public int compare(GameSession o1, GameSession o2) {
-            if (o1.getGuesses().size() > o2.getGuesses().size()) {
-                return 1;
-            } else if (o1.getGuesses().size() < o2.getGuesses().size()) {
-                return -1;
-            } else {
-                return Float.compare(o1.getTime(), o2.getTime());
-            }
-        }
-    }
-
-    public static class GuessResult {
-        private final static String CORRECT = "Chính xác";
-        private final static String LESSER = "Số của bạn nhỏ hơn số ngẫu nhiên";
-        private final static String GREATER = "Số của bạn lớn hơn số ngẫu nhiên";
     }
 }

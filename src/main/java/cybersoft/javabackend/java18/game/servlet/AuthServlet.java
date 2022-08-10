@@ -36,7 +36,8 @@ public class AuthServlet extends HttpServlet {
                 request.getRequestDispatcher(JspUtils.SIGN_IN)
                         .forward(request, response);
             }
-            default -> response.sendRedirect(request.getContextPath() + UrlUtils.NOT_FOUND);
+            default -> request.getRequestDispatcher(request.getContextPath() + UrlUtils.NOT_FOUND)
+                    .forward(request, response);
         }
     }
 
@@ -47,7 +48,8 @@ public class AuthServlet extends HttpServlet {
         switch (request.getServletPath()) {
             case UrlUtils.SIGN_UP -> processSignUp(request, response);
             case UrlUtils.SIGN_IN -> processSignIn(request, response);
-            default -> response.sendRedirect(request.getContextPath() + UrlUtils.NOT_FOUND);
+            default -> request.getRequestDispatcher(request.getContextPath() + UrlUtils.NOT_FOUND)
+                    .forward(request, response);
         }
     }
 

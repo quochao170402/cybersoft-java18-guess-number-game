@@ -15,7 +15,9 @@ import java.util.List;
 public class GuessRepositoryImpl extends AbstractRepository<Guess> implements GuessRepository {
 
     private static GuessRepository repository = null;
-    private RowMapper<Guess> mapper;
+
+    // Row mapper will map data from result set to domain object
+    private final RowMapper<Guess> mapper;
 
     private GuessRepositoryImpl() {
         mapper = new GuessMapper();
@@ -26,13 +28,19 @@ public class GuessRepositoryImpl extends AbstractRepository<Guess> implements Gu
         return repository;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param id game session id
+     * @return List guesses of game session. Always return list, if not found return empty list.
+     */
     @Override
     public List<Guess> findByGameId(String id) {
         /* JDBC Connection */
         // create a connection to database
         return executeQuery(connection -> {
             // write query to find guesses by game id
-            String query = """
+            final String query = """
                     select session_id, value, result, moment
                     from guess
                     where session_id = ?
@@ -53,13 +61,17 @@ public class GuessRepositoryImpl extends AbstractRepository<Guess> implements Gu
         });
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param guess guess need insert
+     */
     @Override
     public void insert(Guess guess) {
-        /* JDBC Connection */
         // create a connection to database
         executeUpdate(connection -> {
             // write query to insert guess to database
-            String query = """
+            final String query = """
                     insert into guess(value, moment, result, session_id)
                     values (?, ?, ?, ?);
                     """;

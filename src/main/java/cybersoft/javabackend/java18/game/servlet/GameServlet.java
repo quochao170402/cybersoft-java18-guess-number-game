@@ -39,7 +39,8 @@ public class GameServlet extends HttpServlet {
             case UrlUtils.NEW_GAME -> {
                 processNewGame(request, response);
             }
-            default -> response.sendRedirect(JspUtils.NOT_FOUND);
+            default -> request.getRequestDispatcher(request.getContextPath() + UrlUtils.NOT_FOUND)
+                    .forward(request, response);
         }
     }
 
@@ -48,7 +49,7 @@ public class GameServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         switch (req.getServletPath()) {
             case UrlUtils.GAME -> {
-                loadGame(req, resp);
+                processGame(req, resp);
             }
             case UrlUtils.RANK -> {
                 String currentPage = req.getParameter("currentPage");
@@ -64,39 +65,37 @@ public class GameServlet extends HttpServlet {
                     processRanking(req, resp, 1);
                 }
             }
-            default -> resp.sendRedirect(JspUtils.NOT_FOUND);
+            default -> req.getRequestDispatcher(req.getContextPath() + UrlUtils.NOT_FOUND)
+                    .forward(req, resp);
         }
     }
 
     // Load current game or create new game
     private void loadGame(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        Player currentPlayer = (Player) request.getSession().getAttribute("currentUser");
-        GameSession currentGame = service.getCurrentGame(currentPlayer.getUsername());
-        request.setAttribute("game", currentGame);
-        request.getRequestDispatcher(JspUtils.GAME).forward(request, response);
+        GameSession currentGame = getCurrentGameFromRequest(request);
+        setCurrentGameToRequest(request, response, currentGame);
     }
 
     private void processGame(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // get current player from request and player's active game in store
-        Player currentPlayer = (Player) req.getSession().getAttribute("currentUser");
-        GameSession currentGame = service.getCurrentGame(currentPlayer.getUsername());
+        // get current player from request and player's active game in database
+        GameSession currentGame = getCurrentGameFromRequest(req);
+
         String numberInput = req.getParameter("number");
         int number = Integer.parseInt(numberInput);
 
         // guess number with current game and player's input number
-        service.guessNumber(currentGame, number);
+        currentGame.getGuesses().add(0, service.guessNumber(currentGame, number));
 
-        // put guess to request
-        req.setAttribute("game", currentGame);
-        req.getRequestDispatcher(JspUtils.GAME).forward(req, resp);
+        setCurrentGameToRequest(req, resp, currentGame);
     }
 
     private void processRanking(HttpServletRequest request, HttpServletResponse response, int page) throws ServletException, IOException {
         // get sorted game list
-        List<GameSession> gameSessions = service.rankingByPagination(page);
-        request.setAttribute("totalPage", Math.round(service.getSizeOfRank() * 1.0 / JspUtils.DEFAULT_PAGE_SIZE));
-        request.setAttribute("games", gameSessions);
+        List<GameSession> sessions = service.rankingByPagination(page);
+        request.setAttribute("totalPage", (int) Math.ceil(service.getSizeOfRank() / (JspUtils.DEFAULT_PAGE_SIZE * 1.0)));
         request.setAttribute("currentPage", page);
+
+        request.setAttribute("games", sessions);
         request.getRequestDispatcher(JspUtils.RANK).forward(request, response);
     }
 
@@ -107,8 +106,17 @@ public class GameServlet extends HttpServlet {
         // create new game
         GameSession newGame = service.createGame(currentPlayer.getUsername());
 
-        // set to request
-        request.setAttribute("game", newGame);
+        setCurrentGameToRequest(request, response, newGame);
+    }
+
+    private GameSession getCurrentGameFromRequest(HttpServletRequest request) {
+        Player currentPlayer = (Player) request.getSession().getAttribute("currentUser");
+        return service.getCurrentGame(currentPlayer.getUsername());
+    }
+
+    private void setCurrentGameToRequest(HttpServletRequest request, HttpServletResponse response,
+                                         GameSession gameSession) throws ServletException, IOException {
+        request.setAttribute("game", gameSession);
         request.getRequestDispatcher(JspUtils.GAME).forward(request, response);
     }
 

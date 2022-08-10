@@ -17,7 +17,9 @@ import java.util.List;
 public class GameSessionRepositoryImpl extends AbstractRepository<GameSession> implements GameSessionRepository {
 
     private static GameSessionRepository repository = null;
-    private RowMapper<GameSession> mapper;
+
+    // Row mapper will map data from result set to domain object
+    private final RowMapper<GameSession> mapper;
 
     private GameSessionRepositoryImpl() {
         mapper = new GameSessionMapper();
@@ -28,11 +30,16 @@ public class GameSessionRepositoryImpl extends AbstractRepository<GameSession> i
         return repository;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param gameSession values to insert
+     */
     @Override
     public void insert(GameSession gameSession) {
         executeUpdate(connection -> {
             // write query to insert game session to database
-            String query = """
+            final String query = """
                     insert into game_session
                     (id, target, start_time, completed, active, username)
                     values(?, ?, ?, ?, ?, ?)
@@ -52,12 +59,19 @@ public class GameSessionRepositoryImpl extends AbstractRepository<GameSession> i
         });
     }
 
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param username Player username
+     * @return List player's game session. Always return list object, if not found game to return empty list
+     */
     @Override
     public List<GameSession> findByUsername(String username) {
         /* JDBC Connection */
         return executeQuery(connection -> {
             // write query to find games by username
-            String query = """
+            final String query = """
                     select id, target, start_time, end_time, completed, active, username
                     from game_session
                     where username = ?;
@@ -76,11 +90,11 @@ public class GameSessionRepositoryImpl extends AbstractRepository<GameSession> i
     }
 
     @Override
-    public List<GameSession> rankingByPagination(int page) {
+    public List<GameSession> rankingWithPagination(int page) {
         /* JDBC Connection */
         return executeQuery(connection -> {
             // write query to find completed games
-            String query = """
+            final String query = """
                     select id, target, start_time, end_time, username, completed, active
                     from ranking
                     where completed = 1
@@ -107,7 +121,7 @@ public class GameSessionRepositoryImpl extends AbstractRepository<GameSession> i
         // Create a connection to database
         executeUpdate(connection -> {
             // write query to deactivate all games by username
-            String query = """
+            final String query = """
                     update game_session
                     set active = 0
                     where username = ?;
@@ -121,12 +135,12 @@ public class GameSessionRepositoryImpl extends AbstractRepository<GameSession> i
     }
 
     @Override
-    public void finishedGameById(String id) {
+    public void completedGameById(String id) {
         /* JDBC Connection */
         // Create a connection to database
         executeUpdate(connection -> {
             // write query to completed game by game id
-            String query = """
+            final String query = """
                     update game_session
                     set active = 0,
                     completed = 1,
@@ -144,14 +158,13 @@ public class GameSessionRepositoryImpl extends AbstractRepository<GameSession> i
         });
     }
 
-    // how implement count method using abstract repository
     @Override
-    public int count() {
+    public int getNumberOfRecordGameSessionTable() {
         /* JDBC Connection */
         // create a connection to database
         return executeCountRecord(connection -> {
             // write query to count number of games
-            String query = """
+            final String query = """
                     select count(*)
                     from game_session;
                     """;
@@ -168,10 +181,10 @@ public class GameSessionRepositoryImpl extends AbstractRepository<GameSession> i
     }
 
     @Override
-    public int getRankSize() {
+    public int getNumberOfRecordRankingView() {
         return executeCountRecord(connection -> {
             // write query to count number of game in rank view
-            String query = """
+            final String query = """
                     select count(*) as size
                     from ranking
                     """;
