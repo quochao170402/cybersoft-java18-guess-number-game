@@ -19,13 +19,30 @@
 </head>
 
 <body>
-<div class="container col-md-6">
-    <div style="margin-bottom: 20px;">
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark justify-content-center">
-            <a class="navbar-brand" href="<%=request.getContextPath() + UrlUtils.GAME%>">Trò chơi</a>
-            <a class="navbar-brand" href="<%=request.getContextPath() + UrlUtils.RANK%>">Xếp hạng</a>
-        </nav>
+<nav class="navbar navbar-expand-lg navbar-light" style="background-color: #e3f2fd;">
+    <a class="navbar-brand font-weight-bold" href="#">Trò Chơi Đoán Số</a>
+    <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item active">
+                <a class="nav-link font-weight-bold" href="<%=request.getContextPath() + UrlUtils.GAME%>">Game</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link font-weight-bold"
+                   href="<%=request.getContextPath() + UrlUtils.RANK%>">Ranking</a>
+            </li>
+        </ul>
     </div>
+    <div class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle font-weight-bold" href="#" role="button" data-toggle="dropdown"
+           aria-expanded="false">
+            ${sessionScope.currentUser.name}
+        </a>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="<%=request.getContextPath() + UrlUtils.LOG_OUT%>">Đăng xuất</a></li>
+        </ul>
+    </div>
+</nav>
+<div class="container col-md-6">
 
     <table class="table">
         <h1 class="text-center">Bảng xếp hạng người chơi</h1>
@@ -61,12 +78,6 @@
                            name="pagination" ${currentPage == 1 ? 'disabled': ''} >
                 </li>
 
-                <%--                <c:forEach begin="1" end="${size}" var="page">--%>
-                <%--                    <li class="page-item">--%>
-                <%--                        <input type="submit" class="page-link" value="${page}" name="page">--%>
-                <%--                    </li>--%>
-                <%--                </c:forEach>--%>
-
                 <li class="page-item">
                     <input type="submit" class="page-link" value="Next"
                            name="pagination" ${currentPage == totalPage ? 'disabled' : ''}>
@@ -89,19 +100,4 @@
         crossorigin="anonymous"></script>
 </body>
 
-</html><%--
-<nav aria-label="Page navigation example">
-            <ul class="pagination">
-                <li class="page-item"><a class="page-link"
-                                         href="<%=request.getContextPath() + UrlUtils.PREV%>">Previous</a></li>
-                <c:forEach begin="1" end="10" var="index" varStatus="loop">
-                    <li class="page-item"><a class="page-link"
-                                             href="<%=request.getContextPath() + UrlUtils.PAGE%>">${index}</a>
-                    </li>
-                </c:forEach>
-                <li class="page-item"><a class="page-link"
-                                         href="<%=request.getContextPath() + UrlUtils.NEXT%>">Next</a>
-                </li>
-            </ul>
-        </nav>
---%>
+</html>

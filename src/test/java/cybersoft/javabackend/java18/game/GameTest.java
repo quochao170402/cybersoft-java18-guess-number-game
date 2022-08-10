@@ -9,17 +9,17 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @TestInstance(Lifecycle.PER_CLASS)
 class GameTest {
-	private Game game;
-	
+    private Game game;
+
 //	private Executable startGame = () -> game.start();
-	
-	@BeforeAll
-	public void setupTest() {
-		game = new Game();
-	}
-	
-	@Test
-	void shouldStartedSuccessfully() {
-		assertDoesNotThrow(() -> game.start());
-	}
+
+    @BeforeAll
+    public void setupTest() {
+        game = new Game();
+    }
+
+    @Test
+    void shouldStartedSuccessfully() {
+        assertDoesNotThrow(() -> game.start());
+    }
 }
