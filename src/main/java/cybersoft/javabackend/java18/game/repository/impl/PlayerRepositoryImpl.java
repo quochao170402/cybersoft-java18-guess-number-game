@@ -2,6 +2,7 @@ package cybersoft.javabackend.java18.game.repository.impl;
 
 import cybersoft.javabackend.java18.game.mapper.PlayerMapper;
 import cybersoft.javabackend.java18.game.model.Player;
+import cybersoft.javabackend.java18.game.repository.AbstractRepository;
 import cybersoft.javabackend.java18.game.repository.PlayerRepository;
 
 import java.sql.PreparedStatement;

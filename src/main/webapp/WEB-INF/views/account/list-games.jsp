@@ -1,3 +1,10 @@
+<%--
+  Created by IntelliJ IDEA.
+  User: DELL
+  Date: 8/12/2022
+  Time: 8:22 AM
+  To change this template use File | Settings | File Templates.
+--%>
 <%@ page import="cybersoft.javabackend.java18.game.utils.UrlUtils" %>
 <%@ page import="cybersoft.javabackend.java18.game.utils.JspUtils" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
@@ -8,7 +15,7 @@
 <html>
 
 <head>
-    <title>Bảng xếp hạng</title>
+    <title>Games của bạn</title>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -19,6 +26,7 @@
 </head>
 
 <body>
+
 <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #e3f2fd;">
     <a class="navbar-brand font-weight-bold" href="#">Trò Chơi Đoán Số</a>
     <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
@@ -26,11 +34,11 @@
             <li class="nav-item">
                 <a class="nav-link font-weight-bold" href="<%=request.getContextPath() + UrlUtils.GAME%>">Game</a>
             </li>
-            <li class="nav-item ">
+            <li class="nav-item active">
                 <a class="nav-link font-weight-bold" href="<%=request.getContextPath() + UrlUtils.LIST_GAME%>">List
                     game</a>
             </li>
-            <li class="nav-item active">
+            <li class="nav-item">
                 <a class="nav-link font-weight-bold"
                    href="<%=request.getContextPath() + UrlUtils.RANK%>">Ranking</a>
             </li>
@@ -47,34 +55,68 @@
     </div>
 </nav>
 
-<div class="container col-md-6">
+<div class="container col-md-10">
 
     <table class="table">
-        <h1 class="text-center">Bảng xếp hạng người chơi</h1>
-        <table class="table">
+        <h1 class="text-center">DANH SÁCH MÀN CHƠI</h1>
+        <table class="table ">
             <thead class="thead-light">
-            <tr>
-                <th scope="col">Thứ tự</th>
-                <th scope="col">ID</th>
-                <th scope="col">Người chơi</th>
-                <th scope="col">Số lần đoán</th>
-                <th scope="col">Thời gian (phút)</th>
+            <tr class="text-center">
+                <th scope="col">No</th>
+                <th scope="col">Game ID</th>
+                <th scope="col">Target</th>
+                <th scope="col">Start time</th>
+                <th scope="col">End time</th>
+                <th scope="col">Guesses</th>
+                <th scope="col">Active</th>
+                <th scope="col">Complete</th>
+                <th scope="col">Action</th>
             </tr>
             </thead>
             <tbody>
             <c:forEach items="${games}" var="game" varStatus="loop">
-                <tr class="table-success">
+
+                <tr class="${game.isCompleted ? 'table-success' : 'table-primary'} text-center">
                     <th scope="row">${loop.index+1}</th>
                     <td>${game.id}</td>
-                    <td>${game.username}</td>
+                    <td>
+                            ${game.isCompleted ? game.targetNumber : "?"}
+                    </td>
+                    <td>${game.getTimeFormatted(game.startTime)}</td>
+                    <td>${game.endTime == null ? 'Undefined' : game.getTimeFormatted(game.endTime)}</td>
                     <td>${game.guesses.size()}</td>
-                    <td>${game.getCompletedTimeFormatted()}</td>
+                    <td>
+                        <c:choose>
+                            <c:when test="${game.isActive}">
+                                <a class="btn btn-warning"
+                                   href="<%=request.getContextPath() + UrlUtils.DEACTIVATE_GAME%>?game-id=${game.id}"
+                                   role="button">Deactivate</a>
+                            </c:when>
+                            <c:otherwise>
+                                <a class="btn btn-success"
+                                   href="<%=request.getContextPath() + UrlUtils.ACTIVATE_GAME%>?game-id=${game.id}"
+                                   role="button">Activate</a>
+                            </c:otherwise>
+                        </c:choose>
+                    </td>
+                    <td>${game.isCompleted ? "Completed" : "Incomplete"}</td>
+                    <td>
+                        <a class="btn btn-primary"
+                           href="<%=request.getContextPath() + UrlUtils.VIEW_GAME%>?game-id=${game.id}"
+                           role="button">View</a>
+                        <c:if test="${!game.isCompleted}">
+                            <a class="btn btn-success"
+                               href="<%=request.getContextPath() + UrlUtils.CONTINUE_GAME%>?game-id=${game.id}"
+                               role="button">Continue</a>
+                        </c:if>
+
+                    </td>
                 </tr>
             </c:forEach>
             </tbody>
         </table>
         <nav aria-label="Page navigation example">
-            <form action="<%=request.getContextPath() + UrlUtils.RANK%>" method="post" class="pagination">
+            <form action="<%=request.getContextPath() + UrlUtils.LIST_GAME%>" method="post" class="pagination">
 
                 <input type="hidden" value="${currentPage}" name="currentPage">
 
@@ -89,7 +131,6 @@
                 </li>
             </form>
         </nav>
-
 
     </table>
 </div>

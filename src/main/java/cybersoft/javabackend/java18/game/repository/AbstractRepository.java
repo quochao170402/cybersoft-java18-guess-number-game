@@ -1,8 +1,7 @@
-package cybersoft.javabackend.java18.game.repository.impl;
+package cybersoft.javabackend.java18.game.repository;
 
 import cybersoft.javabackend.java18.game.config.MySQLConnection;
 import cybersoft.javabackend.java18.game.exception.DatabaseNotFoundException;
-import cybersoft.javabackend.java18.game.repository.JdbcExecute;
 
 import java.sql.Connection;
 import java.sql.SQLException;

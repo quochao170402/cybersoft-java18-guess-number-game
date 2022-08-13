@@ -19,7 +19,7 @@ public class AuthFilter implements Filter {
         if (isLoginUser(req) || isAuthUrl(req)) {
             chain.doFilter(request, response);
         } else {
-            resp.sendRedirect(req.getContextPath() + UrlUtils.SIGN_IN);
+            resp.sendRedirect(req.getContextPath() + UrlUtils.LOGIN);
         }
 
         /*
@@ -35,7 +35,7 @@ public class AuthFilter implements Filter {
 
     private boolean isAuthUrl(HttpServletRequest request) {
         String path = request.getServletPath();
-        return path.startsWith(UrlUtils.SIGN_UP)
-                || path.startsWith(UrlUtils.SIGN_IN);
+        return path.startsWith(UrlUtils.REGISTER)
+                || path.startsWith(UrlUtils.LOGIN);
     }
 }

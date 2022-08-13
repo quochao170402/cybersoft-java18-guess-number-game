@@ -40,7 +40,7 @@ public interface GameSessionRepository {
      *
      * @return Number of records if successful or 0
      */
-    int getNumberOfRecordGameSessionTable();
+    int countGames();
 
     /**
      * Ranking completed games with pagination
@@ -56,4 +56,37 @@ public interface GameSessionRepository {
      * @return Number of records if successful or 0
      */
     public int getNumberOfRecordRankingView();
+
+    /**
+     * Update game active or inactive
+     *
+     * @param gameId Game session id
+     * @param active Active or inactive
+     */
+    void updateActiveById(String gameId, boolean active);
+
+    /**
+     * Find game session by game session id
+     *
+     * @param id Id game
+     * @return A game if found or null
+     */
+    GameSession findById(String id);
+
+    /**
+     * Find games by username with pagination
+     *
+     * @param username Player's username
+     * @param page     current page
+     * @return List games if found or empty list
+     */
+    List<GameSession> findByUsernameWithPagination(String username, int page);
+
+    /**
+     * Count number of games by player's username
+     *
+     * @param username player's username
+     * @return number of games
+     */
+    int countGamesByUsername(String username);
 }

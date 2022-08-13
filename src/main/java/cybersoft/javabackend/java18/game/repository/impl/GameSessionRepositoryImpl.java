@@ -3,6 +3,7 @@ package cybersoft.javabackend.java18.game.repository.impl;
 import cybersoft.javabackend.java18.game.mapper.GameSessionMapper;
 import cybersoft.javabackend.java18.game.mapper.RowMapper;
 import cybersoft.javabackend.java18.game.model.GameSession;
+import cybersoft.javabackend.java18.game.repository.AbstractRepository;
 import cybersoft.javabackend.java18.game.repository.GameSessionRepository;
 import cybersoft.javabackend.java18.game.utils.JspUtils;
 
@@ -89,6 +90,12 @@ public class GameSessionRepositoryImpl extends AbstractRepository<GameSession> i
         });
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param page Page need get data
+     * @return Sorted list game session in this page
+     */
     @Override
     public List<GameSession> rankingWithPagination(int page) {
         /* JDBC Connection */
@@ -159,7 +166,7 @@ public class GameSessionRepositoryImpl extends AbstractRepository<GameSession> i
     }
 
     @Override
-    public int getNumberOfRecordGameSessionTable() {
+    public int countGames() {
         /* JDBC Connection */
         // create a connection to database
         return executeCountRecord(connection -> {
@@ -194,6 +201,94 @@ public class GameSessionRepositoryImpl extends AbstractRepository<GameSession> i
             ResultSet results = statement.executeQuery();
             if (results.next()) {
                 return results.getInt("size");
+            } else return 0;
+        });
+    }
+
+    @Override
+    public void updateActiveById(String id, boolean active) {
+        // Create a connection to database
+        executeUpdate(connection -> {
+            // write query to completed game by game id
+            final String query = """
+                    update game_session
+                    set active = ?
+                    where id = ?;
+                    """;
+
+            // create prepared statement to execute query
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setBoolean(1, active);
+            statement.setString(2, id);
+
+            return statement.executeUpdate();
+        });
+    }
+
+    @Override
+    public GameSession findById(String id) {
+        return executeQuerySingle(connection -> {
+            // write query to find games by username
+            final String query = """
+                    select id, target, start_time, end_time, completed, active, username
+                    from game_session
+                    where id = ?;
+                    """;
+
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, id);
+
+            ResultSet results = statement.executeQuery();
+            if (results.next()) {
+                return mapper.map(results);
+            }
+            return null;
+        });
+    }
+
+    @Override
+    public List<GameSession> findByUsernameWithPagination(String username, int page) {
+        return executeQuery(connection -> {
+            // write query to find completed games
+            final String query = """
+                    select id, target, start_time, end_time, username, completed, active
+                    from game_session
+                    where username = ?
+                    limit ? offset ?
+                    """;
+            // create prepared statement to execute query
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, username);
+            statement.setInt(2, JspUtils.DEFAULT_PAGE_SIZE);
+            statement.setInt(3, (page - 1) * JspUtils.DEFAULT_PAGE_SIZE);
+
+            // get result set
+            ResultSet results = statement.executeQuery();
+            List<GameSession> gameSessions = new ArrayList<>();
+            while (results.next()) {
+                gameSessions.add(mapper.map(results));
+            }
+            return gameSessions;
+        });
+    }
+
+    @Override
+    public int countGamesByUsername(String username) {
+        return executeCountRecord(connection -> {
+            // write query to count number of games
+            final String query = """
+                    select count(*)
+                    from game_session
+                    where username = ?
+                    """;
+
+            // create prepared statement to execute query
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, username);
+            // get result from result set
+            ResultSet results = statement.executeQuery();
+            if (results.next()) {
+                return results.getInt(1);
             } else return 0;
         });
     }

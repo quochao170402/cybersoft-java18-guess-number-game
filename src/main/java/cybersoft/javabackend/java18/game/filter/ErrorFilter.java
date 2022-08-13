@@ -9,13 +9,13 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @WebFilter(urlPatterns = {UrlUtils.ALL})
-public class InternalErrorFilter implements Filter {
+public class ErrorFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse resp = (HttpServletResponse) response;
 
-        System.out.println(req.getServletPath() + " status:"+resp.getStatus());
+        System.out.println(req.getServletPath() + " " + resp.getStatus());
         if (resp.getStatus() == 500) {
             resp.sendRedirect(req.getContextPath() + UrlUtils.INTERNAL_ERROR);
         } else if (resp.getStatus() == 404) {

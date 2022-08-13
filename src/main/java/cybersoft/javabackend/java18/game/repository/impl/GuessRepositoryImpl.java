@@ -3,7 +3,9 @@ package cybersoft.javabackend.java18.game.repository.impl;
 import cybersoft.javabackend.java18.game.mapper.GuessMapper;
 import cybersoft.javabackend.java18.game.mapper.RowMapper;
 import cybersoft.javabackend.java18.game.model.Guess;
+import cybersoft.javabackend.java18.game.repository.AbstractRepository;
 import cybersoft.javabackend.java18.game.repository.GuessRepository;
+import cybersoft.javabackend.java18.game.utils.JspUtils;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -88,5 +90,50 @@ public class GuessRepositoryImpl extends AbstractRepository<Guess> implements Gu
         });
     }
 
+    @Override
+    public List<Guess> findByGameIdWithPagination(String gameId, int page) {
+        return executeQuery(connection -> {
+            // write query to find guesses by game id with pagination
+            final String query = """
+                    select session_id, value, result, moment
+                    from guess
+                    where session_id = ?
+                    limit ? offset ?
+                    """;
+
+            // create prepared to execute query
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, gameId);
+            statement.setInt(2, JspUtils.DEFAULT_PAGE_SIZE);
+            statement.setInt(3, (page - 1) * JspUtils.DEFAULT_PAGE_SIZE);
+
+            // get result from result set
+            ResultSet results = statement.executeQuery();
+            List<Guess> guesses = new ArrayList<>();
+            while (results.next()) {
+                guesses.add(mapper.map(results));
+            }
+            return guesses;
+        });
+    }
+
+    @Override
+    public int countGuessesByGameId(String gameId) {
+        return executeCountRecord(connection -> {
+            final String query = """
+                    select count(*) as total
+                    from guess
+                    where session_id = ?
+                    """;
+
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, gameId);
+            ResultSet results = statement.executeQuery();
+            if (results.next()) {
+                return results.getInt("total");
+            }
+            return 0;
+        });
+    }
 
 }
