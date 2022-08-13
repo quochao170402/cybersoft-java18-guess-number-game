@@ -144,6 +144,7 @@ public class AccountServlet extends HttpServlet {
         request.getRequestDispatcher(JspUtils.VIEW_GAME).forward(request, response);
     }
 
+    
     private void setActiveGame(HttpServletRequest request, HttpServletResponse response, boolean active)
             throws IOException {
         String gameId = request.getParameter("game-id");

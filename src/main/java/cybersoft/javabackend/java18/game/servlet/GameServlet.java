@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.util.List;
 
 @WebServlet(name = "gameServlet", urlPatterns = {
+        UrlUtils.ROOT,
         UrlUtils.GAME,
         UrlUtils.NEW_GAME,
         UrlUtils.RANK
@@ -34,7 +35,7 @@ public class GameServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         switch (request.getServletPath()) {
-            case UrlUtils.GAME -> {
+            case UrlUtils.GAME, UrlUtils.ROOT -> {
                 loadGame(request, response);
             }
             case UrlUtils.RANK -> {
