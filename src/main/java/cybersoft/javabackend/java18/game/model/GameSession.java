@@ -3,6 +3,7 @@ package cybersoft.javabackend.java18.game.model;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -53,12 +54,13 @@ public class GameSession implements Serializable {
     }
 
 
-    public float getTime() {
-        return (float) Duration.between(startTime, endTime).getSeconds() / 60;
+    public String getCompletedTimeFormatted() {
+        return String.format("%.2f", (float) Duration.between(startTime, endTime).getSeconds() / 60);
     }
 
-    public String getTimeFormatted() {
-        return String.format("%.2f", getTime());
+    public String getTimeFormatted(LocalDateTime localDateTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return localDateTime.format(formatter);
     }
 
     public void finished() {
@@ -69,6 +71,14 @@ public class GameSession implements Serializable {
 
     public boolean isCompleted() {
         return isCompleted;
+    }
+
+    public boolean getIsCompleted() {
+        return isCompleted;
+    }
+
+    public boolean getIsActive() {
+        return isActive;
     }
 
     public boolean isActive() {

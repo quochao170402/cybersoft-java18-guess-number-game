@@ -1,7 +1,7 @@
 package cybersoft.javabackend.java18.game.servlet;
 
 import cybersoft.javabackend.java18.game.model.Player;
-import cybersoft.javabackend.java18.game.service.GameService;
+import cybersoft.javabackend.java18.game.service.impl.GameServiceImpl;
 import cybersoft.javabackend.java18.game.utils.JspUtils;
 import cybersoft.javabackend.java18.game.utils.UrlUtils;
 
@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
-@WebServlet(name = "authServlet", urlPatterns = {UrlUtils.SIGN_UP, UrlUtils.SIGN_IN, UrlUtils.LOG_OUT})
+@WebServlet(name = "authServlet", urlPatterns = {UrlUtils.REGISTER, UrlUtils.LOGIN, UrlUtils.LOG_OUT})
 public class AuthServlet extends HttpServlet {
 
     @Override
@@ -21,22 +21,23 @@ public class AuthServlet extends HttpServlet {
             throws ServletException, IOException {
 
         switch (request.getServletPath()) {
-            case UrlUtils.SIGN_UP -> {
+            case UrlUtils.REGISTER -> {
                 request.removeAttribute("errors");
-                request.getRequestDispatcher(JspUtils.SIGN_UP)
+                request.getRequestDispatcher(JspUtils.REGISTER)
                         .forward(request, response);
             }
-            case UrlUtils.SIGN_IN -> {
+            case UrlUtils.LOGIN -> {
                 request.removeAttribute("errors");
-                request.getRequestDispatcher(JspUtils.SIGN_IN)
+                request.getRequestDispatcher(JspUtils.LOGIN)
                         .forward(request, response);
             }
             case UrlUtils.LOG_OUT -> {
                 request.getSession().invalidate();
-                request.getRequestDispatcher(JspUtils.SIGN_IN)
+                request.getRequestDispatcher(JspUtils.LOGIN)
                         .forward(request, response);
             }
-            default -> response.sendRedirect(request.getContextPath() + UrlUtils.NOT_FOUND);
+            default -> request.getRequestDispatcher(request.getContextPath() + UrlUtils.NOT_FOUND)
+                    .forward(request, response);
         }
     }
 
@@ -45,16 +46,17 @@ public class AuthServlet extends HttpServlet {
             throws ServletException, IOException {
 
         switch (request.getServletPath()) {
-            case UrlUtils.SIGN_UP -> processSignUp(request, response);
-            case UrlUtils.SIGN_IN -> processSignIn(request, response);
-            default -> response.sendRedirect(request.getContextPath() + UrlUtils.NOT_FOUND);
+            case UrlUtils.REGISTER -> processSignUp(request, response);
+            case UrlUtils.LOGIN -> processSignIn(request, response);
+            default -> request.getRequestDispatcher(request.getContextPath() + UrlUtils.NOT_FOUND)
+                    .forward(request, response);
         }
     }
 
     private void processSignIn(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
-        Player player = GameService.getService().signIn(username, password);
+        Player player = GameServiceImpl.getService().login(username, password);
         if (player != null) {
             HttpSession session = request.getSession();
             session.setAttribute("currentUser", player);
@@ -62,7 +64,7 @@ public class AuthServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + UrlUtils.GAME);
         } else {
             request.setAttribute("errors", "Thông tin người chơi không hợp lệ hoặc đã được sử dụng");
-            request.getRequestDispatcher(JspUtils.SIGN_IN).forward(request, response);
+            request.getRequestDispatcher(JspUtils.LOGIN).forward(request, response);
         }
 
     }
@@ -72,7 +74,7 @@ public class AuthServlet extends HttpServlet {
         String password = request.getParameter("password");
         String name = request.getParameter("name");
 
-        Player player = GameService.getService().signUp(username, password, name);
+        Player player = GameServiceImpl.getService().register(username, password, name);
 
         if (player != null) {
             HttpSession session = request.getSession();
@@ -81,7 +83,7 @@ public class AuthServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + UrlUtils.GAME);
         } else {
             request.setAttribute("errors", "Thông tin người chơi không hợp lệ hoặc đã được sử dụng");
-            request.getRequestDispatcher(JspUtils.SIGN_UP).forward(request, response);
+            request.getRequestDispatcher(JspUtils.REGISTER).forward(request, response);
         }
     }
 

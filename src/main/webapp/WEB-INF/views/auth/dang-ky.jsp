@@ -18,17 +18,26 @@
 <body>
 <div>
     <div class="container">
-        <div class="col-md-6 offset-md-3">
-            <nav class="navbar navbar-expand-lg navbar-dark bg-dark justify-content-center">
-                <a class="navbar-brand" href="<%=request.getContextPath() + UrlUtils.GAME%>">Trò chơi</a>
-                <a class="navbar-brand" href="<%=request.getContextPath() + UrlUtils.RANK%>">Xếp hạng</a>
-                <a class="navbar-brand" href="<%=request.getContextPath() + UrlUtils.SIGN_IN%>">Đăng nhập</a>
-            </nav>
-        </div>
+        <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #e3f2fd;">
+            <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link font-weight-bold" href="<%=request.getContextPath() + UrlUtils.LOGIN%>">Đăng
+                            nhập<span
+                                    class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link font-weight-bold" href="<%=request.getContextPath() + UrlUtils.REGISTER%>">Đăng
+                            ký</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
         <h1 class="text-center text-primary mt-5">ĐĂNG KÝ</h1>
         <div class="row">
             <div class="col-md-4 offset-md-4">
-                <form action="<%=request.getContextPath() + UrlUtils.SIGN_UP%>" method="post">
+                <form action="<%=request.getContextPath() + UrlUtils.REGISTER%>" method="post">
                     <c:if test="${errors != null}">
                         <div class="alert alert-danger" role="alert">
                                 ${errors}

@@ -20,11 +20,11 @@
     <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
         <ul class="navbar-nav">
             <li class="nav-item active">
-                <a class="nav-link font-weight-bold" href="<%=request.getContextPath() + UrlUtils.ROOT%>">Home<span
-                        class="sr-only">(current)</span></a>
+                <a class="nav-link font-weight-bold" href="<%=request.getContextPath() + UrlUtils.GAME%>">Game</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link font-weight-bold" href="<%=request.getContextPath() + UrlUtils.GAME%>">Game</a>
+                <a class="nav-link font-weight-bold" href="<%=request.getContextPath() + UrlUtils.LIST_GAME%>">List
+                    game</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link font-weight-bold"
@@ -42,6 +42,7 @@
         </ul>
     </div>
 </nav>
+
 <div class="mt-2 mr-5 float-right">
     <div class="form-row align-items-center">
         <a href="<%=request.getContextPath() + UrlUtils.NEW_GAME%>" type="submit"

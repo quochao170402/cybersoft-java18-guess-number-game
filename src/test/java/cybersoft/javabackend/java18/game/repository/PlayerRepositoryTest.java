@@ -5,25 +5,27 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class PlayerRepositoryTest {
-    private PlayerRepository repository;
+    PlayerRepository repository;
 
     @BeforeAll
-    public void setupTest() {
+    void setup() {
         repository = PlayerRepositoryImpl.getRepository();
     }
 
     @Test
-    void shouldGetAllWorkCorrectly() {
-        assertEquals(101, repository.getAll().size());
+    void shouldExistedByUsernameWorkCorrectly() {
+        assertTrue(repository.existedByUsername("admin"));
+        assertFalse(repository.existedByUsername("010101010"));
     }
 
     @Test
-    void shouldFindByUserNameWorkCorrectly() {
+    void shouldFindByUsernameWorkCorrectly() {
         assertNotNull(repository.findByUsername("admin"));
+        assertNull(repository.findByUsername("0101010"));
     }
+
 }
