@@ -56,6 +56,10 @@
                                required>
                         <small id="passwordHelp" class="form-text text-muted">Mật khẩu</small>
                     </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="exampleCheck1" name="remember">
+                        <label class="form-check-label" for="exampleCheck1">Remember me</label>
+                    </div>
                     <button type="submit" class="btn btn-primary">Đăng nhập</button>
                 </form>
             </div>

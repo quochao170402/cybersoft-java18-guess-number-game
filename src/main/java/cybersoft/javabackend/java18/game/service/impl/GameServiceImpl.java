@@ -3,12 +3,15 @@ package cybersoft.javabackend.java18.game.service.impl;
 import cybersoft.javabackend.java18.game.model.GameSession;
 import cybersoft.javabackend.java18.game.model.Guess;
 import cybersoft.javabackend.java18.game.model.Player;
+import cybersoft.javabackend.java18.game.model.Token;
 import cybersoft.javabackend.java18.game.repository.GameSessionRepository;
 import cybersoft.javabackend.java18.game.repository.GuessRepository;
 import cybersoft.javabackend.java18.game.repository.PlayerRepository;
+import cybersoft.javabackend.java18.game.repository.TokenRepository;
 import cybersoft.javabackend.java18.game.repository.impl.GameSessionRepositoryImpl;
 import cybersoft.javabackend.java18.game.repository.impl.GuessRepositoryImpl;
 import cybersoft.javabackend.java18.game.repository.impl.PlayerRepositoryImpl;
+import cybersoft.javabackend.java18.game.repository.impl.TokenRepositoryImpl;
 import cybersoft.javabackend.java18.game.service.GameService;
 
 import java.util.List;
@@ -20,6 +23,8 @@ public class GameServiceImpl implements GameService {
     private final PlayerRepository playerRepository;
     private final GuessRepository guessRepository;
 
+    private final TokenRepository tokenRepository;
+
     // total game in database. using it to set game session id
     private int indexId;
 
@@ -28,6 +33,7 @@ public class GameServiceImpl implements GameService {
         this.gameSessionRepository = GameSessionRepositoryImpl.getRepository();
         this.playerRepository = PlayerRepositoryImpl.getRepository();
         this.guessRepository = GuessRepositoryImpl.getRepository();
+        this.tokenRepository = TokenRepositoryImpl.getRepository();
         indexId = gameSessionRepository.countGames() + 1;
 
     }
@@ -189,7 +195,6 @@ public class GameServiceImpl implements GameService {
         return games;
     }
 
-
     @Override
     public int countGuessesByGameId(String gameId) {
         return guessRepository.countGuessesByGameId(gameId);
@@ -207,5 +212,25 @@ public class GameServiceImpl implements GameService {
             gameSessionRepository.deactivateAllGameByUsername(gameSession.getUsername());
         }
         gameSessionRepository.updateActiveById(gameId, isActive);
+    }
+
+    @Override
+    public void saveToken(Token token) {
+        tokenRepository.insert(token);
+    }
+
+    @Override
+    public void deleteToken(String selector) {
+        tokenRepository.deleteToken(selector);
+    }
+
+    @Override
+    public Token getToken(String selector) {
+        return tokenRepository.getToken(selector);
+    }
+
+    @Override
+    public void resetToken(String selector, String validator) {
+        tokenRepository.resetToken(selector, validator);
     }
 }

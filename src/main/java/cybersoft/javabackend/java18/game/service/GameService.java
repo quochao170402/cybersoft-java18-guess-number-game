@@ -3,6 +3,7 @@ package cybersoft.javabackend.java18.game.service;
 import cybersoft.javabackend.java18.game.model.GameSession;
 import cybersoft.javabackend.java18.game.model.Guess;
 import cybersoft.javabackend.java18.game.model.Player;
+import cybersoft.javabackend.java18.game.model.Token;
 
 import java.util.List;
 
@@ -110,4 +111,12 @@ public interface GameService {
      * @param isActive is game active
      */
     void setGameActiveById(String gameId, boolean isActive);
+
+    void deleteToken(String selector);
+
+    void saveToken(Token token);
+
+    Token getToken(String selector);
+
+    void resetToken(String selector, String validator);
 }

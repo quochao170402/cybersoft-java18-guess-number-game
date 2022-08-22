@@ -63,7 +63,7 @@
             </thead>
             <tbody>
             <c:forEach items="${games}" var="game" varStatus="loop">
-                <tr class="table-primary">
+                <tr class="table-info">
                     <th scope="row">${loop.index+1}</th>
                     <td>${game.id}</td>
                     <td>${game.username}</td>
