@@ -1,27 +1,31 @@
 package cybersoft.javabackend.java18.game.servlet;
 
 import cybersoft.javabackend.java18.game.model.Player;
-import cybersoft.javabackend.java18.game.model.Token;
-import cybersoft.javabackend.java18.game.service.GameService;
-import cybersoft.javabackend.java18.game.service.impl.GameServiceImpl;
+import cybersoft.javabackend.java18.game.security.Token;
+import cybersoft.javabackend.java18.game.security.TokenHelper;
+import cybersoft.javabackend.java18.game.service.AuthService;
+import cybersoft.javabackend.java18.game.service.impl.AuthServiceImpl;
 import cybersoft.javabackend.java18.game.utils.JspUtils;
 import cybersoft.javabackend.java18.game.utils.UrlUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.*;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.UUID;
 
 @WebServlet(name = "authServlet", urlPatterns = {UrlUtils.REGISTER, UrlUtils.LOGIN, UrlUtils.LOG_OUT})
 public class AuthServlet extends HttpServlet {
 
-    private GameService gameService = null;
+    private AuthService authService = null;
 
     @Override
     public void init() throws ServletException {
         super.init();
-        gameService = GameServiceImpl.getService();
+        authService = AuthServiceImpl.getService();
     }
 
     @Override
@@ -60,7 +64,7 @@ public class AuthServlet extends HttpServlet {
         }
 
         if (!"".equals(selector)) {
-            gameService.deleteToken(selector);
+            authService.deleteToken(selector);
 
             Cookie cookieSelector = new Cookie("selector", "");
             cookieSelector.setMaxAge(0);
@@ -86,7 +90,7 @@ public class AuthServlet extends HttpServlet {
     private void processLogin(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
-        Player player = gameService.login(username, password);
+        Player player = authService.login(username, password);
         if (player != null) {
             if (request.getParameter("remember") != null) {
                 processRememberUser(player, request, response);
@@ -103,61 +107,18 @@ public class AuthServlet extends HttpServlet {
     }
 
     private void processRememberUser(Player player, HttpServletRequest request, HttpServletResponse response) {
-        Token token = getTokenFromRequest(request);
-        if (token != null) {
-            if (token.getUsername().equals(player.getUsername())) {
-                resetToken(token.getSelector());
-            }
-            addCookies(response, token);
+        Token token = TokenHelper.getInstance().getTokenFromRequest(request);
+
+        if (token == null) {
+            token = TokenHelper.getInstance().createToken(player.getUsername());
         } else {
-            String selector = UUID.randomUUID().toString();
-            String validator = UUID.randomUUID().toString();
-            Token newToken = new Token(selector, validator, player.getUsername());
-            gameService.saveToken(newToken);
-            addCookies(response, newToken);
-        }
-    }
-
-    private void resetToken(String selector) {
-        String validator = UUID.randomUUID().toString();
-        gameService.resetToken(selector, validator);
-    }
-
-    private Token getTokenFromRequest(HttpServletRequest req) {
-        Cookie[] cookies = req.getCookies();
-        String selector = "";
-        String validator = "";
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("selector")) {
-                selector = cookie.getValue();
-            } else if (cookie.getName().equals("validator")) {
-                validator = cookie.getValue();
+            if (token.getUsername().equals(player.getUsername())) {
+                token = TokenHelper.getInstance().resetToken(token.getSelector());
             }
         }
+        if (token == null) return;
+        TokenHelper.getInstance().addTokenToCookies(response, token);
 
-        if (selector == null || validator == null) {
-            return null;
-        }
-
-        Token token = gameService.getToken(selector);
-
-        if (token == null) return null;
-
-        if (validator.equals(token.getValidator())) {
-            return token;
-        }
-
-        return null;
-    }
-
-    private void addCookies(HttpServletResponse response, Token token) {
-        Cookie cookieSelector = new Cookie("selector", token.getSelector());
-        cookieSelector.setMaxAge(60 * 60 * 24 * 30);
-        Cookie cookieValidator = new Cookie("validator", token.getValidator());
-        cookieValidator.setMaxAge(60 * 60 * 24 * 30);
-
-        response.addCookie(cookieSelector);
-        response.addCookie(cookieValidator);
     }
 
     private void processRegister(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -165,7 +126,7 @@ public class AuthServlet extends HttpServlet {
         String password = request.getParameter("password");
         String name = request.getParameter("name");
 
-        Player player = gameService.register(username, password, name);
+        Player player = authService.register(username, password, name);
 
         if (player != null) {
             HttpSession session = request.getSession();

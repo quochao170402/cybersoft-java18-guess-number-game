@@ -1,4 +1,4 @@
-package cybersoft.javabackend.java18.game.model;
+package cybersoft.javabackend.java18.game.security;
 
 public class Token {
     private String selector;

@@ -1,8 +1,8 @@
 package cybersoft.javabackend.java18.game.repository.impl;
 
-import cybersoft.javabackend.java18.game.model.Token;
 import cybersoft.javabackend.java18.game.repository.AbstractRepository;
 import cybersoft.javabackend.java18.game.repository.TokenRepository;
+import cybersoft.javabackend.java18.game.security.Token;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -43,8 +43,8 @@ public class TokenRepositoryImpl extends AbstractRepository<Token> implements To
     }
 
     @Override
-    public void resetToken(String selector, String validator) {
-        executeUpdate(connection -> {
+    public boolean resetToken(String selector, String validator) {
+        return executeUpdate(connection -> {
 
             String query = """
                     update token
@@ -55,12 +55,12 @@ public class TokenRepositoryImpl extends AbstractRepository<Token> implements To
             statement.setString(1, validator);
             statement.setString(2, selector);
             return statement.executeUpdate();
-        });
+        }) != 0;
     }
 
     @Override
-    public void insert(Token token) {
-        executeUpdate(connection -> {
+    public boolean insert(Token token) {
+        return executeUpdate(connection -> {
             String query = """
                     insert into token (selector, validator, username)
                     values (?, ?, ?);
@@ -71,7 +71,7 @@ public class TokenRepositoryImpl extends AbstractRepository<Token> implements To
             statement.setString(3, token.getUsername());
 
             return statement.executeUpdate();
-        });
+        }) != 0;
     }
 
     @Override

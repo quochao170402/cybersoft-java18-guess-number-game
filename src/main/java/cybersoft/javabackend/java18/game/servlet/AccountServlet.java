@@ -3,8 +3,10 @@ package cybersoft.javabackend.java18.game.servlet;
 import cybersoft.javabackend.java18.game.model.GameSession;
 import cybersoft.javabackend.java18.game.model.Guess;
 import cybersoft.javabackend.java18.game.model.Player;
-import cybersoft.javabackend.java18.game.service.GameService;
-import cybersoft.javabackend.java18.game.service.impl.GameServiceImpl;
+import cybersoft.javabackend.java18.game.service.GameSessionService;
+import cybersoft.javabackend.java18.game.service.GuessService;
+import cybersoft.javabackend.java18.game.service.impl.GameSessionServiceImpl;
+import cybersoft.javabackend.java18.game.service.impl.GuessServiceImpl;
 import cybersoft.javabackend.java18.game.utils.JspUtils;
 import cybersoft.javabackend.java18.game.utils.UrlUtils;
 
@@ -25,12 +27,14 @@ import java.util.List;
                 UrlUtils.ACTIVATE_GAME
         })
 public class AccountServlet extends HttpServlet {
-    private GameService service;
+    private GameSessionService gameSessionService;
+    private GuessService guessService;
 
     @Override
     public void init() throws ServletException {
         super.init();
-        service = GameServiceImpl.getService();
+        gameSessionService = GameSessionServiceImpl.getService();
+        guessService = GuessServiceImpl.getService();
     }
 
     @Override
@@ -105,10 +109,13 @@ public class AccountServlet extends HttpServlet {
     private void processListGame(HttpServletRequest request, HttpServletResponse response, int page)
             throws ServletException, IOException {
         Player player = (Player) request.getSession().getAttribute("currentUser");
-        List<GameSession> gameSessions = service.findGamesByUsernameWithPagination(player.getUsername(), page);
+        List<GameSession> gameSessions = gameSessionService
+                .findGamesByUsernameWithPagination(player.getUsername(), page);
         int totalPage = (int) Math.ceil(
-                service.countGamesByUsername(player.getUsername()) / (JspUtils.DEFAULT_PAGE_SIZE * 1.0)
-        );
+                gameSessionService.countGamesByUsername(
+                        player.getUsername())
+                        /
+                        (JspUtils.DEFAULT_PAGE_SIZE * 1.0));
 
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPage", totalPage);
@@ -120,8 +127,8 @@ public class AccountServlet extends HttpServlet {
     private void processContinueGame(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String id = request.getParameter("game-id");
-        GameSession gameSession = service.findGameById(id);
-        service.setGameActiveById(id, true);
+        GameSession gameSession = gameSessionService.findGameById(id);
+        gameSessionService.setGameActiveById(id, true);
 
         request.setAttribute("game", gameSession);
 
@@ -130,10 +137,10 @@ public class AccountServlet extends HttpServlet {
 
     private void processViewGame(HttpServletRequest request, HttpServletResponse response, int page) throws ServletException, IOException {
         String gameId = request.getParameter("game-id");
-        List<Guess> guesses = service.findGuessesByGameIdWithPagination(gameId, page);
+        List<Guess> guesses = guessService.findGuessesByGameIdWithPagination(gameId, page);
 
         int totalPage = (int) Math.ceil(
-                service.countGuessesByGameId(gameId) / (JspUtils.DEFAULT_PAGE_SIZE * 1.0)
+                guessService.countGuessesByGameId(gameId) / (JspUtils.DEFAULT_PAGE_SIZE * 1.0)
         );
 
         request.setAttribute("currentPage", page);
@@ -144,11 +151,11 @@ public class AccountServlet extends HttpServlet {
         request.getRequestDispatcher(JspUtils.VIEW_GAME).forward(request, response);
     }
 
-    
+
     private void setActiveGame(HttpServletRequest request, HttpServletResponse response, boolean active)
             throws IOException {
         String gameId = request.getParameter("game-id");
-        service.setGameActiveById(gameId, active);
+        gameSessionService.setGameActiveById(gameId, active);
 
         response.sendRedirect(request.getContextPath() + UrlUtils.LIST_GAME);
     }

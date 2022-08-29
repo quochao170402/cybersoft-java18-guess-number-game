@@ -2,8 +2,10 @@ package cybersoft.javabackend.java18.game.servlet;
 
 import cybersoft.javabackend.java18.game.model.GameSession;
 import cybersoft.javabackend.java18.game.model.Player;
-import cybersoft.javabackend.java18.game.service.GameService;
-import cybersoft.javabackend.java18.game.service.impl.GameServiceImpl;
+import cybersoft.javabackend.java18.game.service.GameSessionService;
+import cybersoft.javabackend.java18.game.service.GuessService;
+import cybersoft.javabackend.java18.game.service.impl.GameSessionServiceImpl;
+import cybersoft.javabackend.java18.game.service.impl.GuessServiceImpl;
 import cybersoft.javabackend.java18.game.utils.JspUtils;
 import cybersoft.javabackend.java18.game.utils.UrlUtils;
 
@@ -23,12 +25,14 @@ import java.util.List;
 })
 public class GameServlet extends HttpServlet {
 
-    private GameService service;
+    private GameSessionService gameSessionService;
+    private GuessService guessService;
 
     @Override
     public void init() throws ServletException {
         super.init();
-        service = GameServiceImpl.getService();
+        gameSessionService = GameSessionServiceImpl.getService();
+        guessService = GuessServiceImpl.getService();
     }
 
     @Override
@@ -87,7 +91,7 @@ public class GameServlet extends HttpServlet {
     // Get current game session from request
     private GameSession getCurrentGameFromRequest(HttpServletRequest request) {
         Player currentPlayer = (Player) request.getSession().getAttribute("currentUser");
-        return service.getCurrentGame(currentPlayer.getUsername());
+        return gameSessionService.getCurrentGame(currentPlayer.getUsername());
     }
 
 
@@ -99,7 +103,7 @@ public class GameServlet extends HttpServlet {
         int number = Integer.parseInt(numberInput);
 
         // guess number with current game and player's input number
-        currentGame.getGuesses().add(0, service.guessingNumber(currentGame, number));
+        currentGame.getGuesses().add(0, guessService.guessingNumber(currentGame, number));
 
         request.setAttribute("game", currentGame);
         request.getRequestDispatcher(JspUtils.GAME).forward(request, response);
@@ -111,7 +115,7 @@ public class GameServlet extends HttpServlet {
         Player currentPlayer = (Player) request.getSession().getAttribute("currentUser");
 
         // create new game
-        GameSession newGame = service.createGame(currentPlayer.getUsername());
+        GameSession newGame = gameSessionService.createGame(currentPlayer.getUsername());
 
         request.setAttribute("game", newGame);
         request.getRequestDispatcher(JspUtils.GAME).forward(request, response);
@@ -119,8 +123,8 @@ public class GameServlet extends HttpServlet {
 
     private void processRanking(HttpServletRequest request, HttpServletResponse response, int page) throws ServletException, IOException {
         // get sorted game list
-        List<GameSession> sessions = service.rankingWithPagination(page);
-        int totalPage = (int) Math.ceil(service.getSizeOfRank() / (JspUtils.DEFAULT_PAGE_SIZE * 1.0));
+        List<GameSession> sessions = gameSessionService.rankingWithPagination(page);
+        int totalPage = (int) Math.ceil(gameSessionService.getSizeOfRank() / (JspUtils.DEFAULT_PAGE_SIZE * 1.0));
 
         request.setAttribute("totalPage", totalPage);
         request.setAttribute("currentPage", page);
