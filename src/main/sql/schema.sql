@@ -30,6 +30,13 @@ create table if not exists guess(
     primary key(id)
 );
 
+create table if not exists token(
+	selector varchar(36),
+    validator varchar(36),
+    username varchar(100),
+    primary key (selector)
+);
+
 -- add foreign key
 
 alter table game_session
@@ -40,20 +47,23 @@ alter table guess
 	add constraint fk_guess_game_session
     foreign key (session_id) references game_session(id);
 
+alter table token
+	add constraint fk_token_player
+    foreign key (username) references player(username)
 
 -- Create a procedure to ranking by number of guesses and time to complete game
 DELIMITER $$
 CREATE PROCEDURE ranking()
-    BEGIN
-      CREATE OR REPLACE VIEW ranking
-        AS
-            select 	gs.*,
-                (select count(*) from guess g  where g.session_id = gs.id ) as guesses,
-                (select TIMESTAMPDIFF(second, gs.start_time, gs.end_time)) as times
-            from game_session as gs
-            where gs.completed = 1
-            order by  guesses, times;
-    END; $$
+BEGIN
+  CREATE OR REPLACE VIEW ranking
+	AS
+		select 	gs.*,
+			(select count(*) from guess g  where g.session_id = gs.id ) as guesses,
+			(select TIMESTAMPDIFF(second, gs.start_time, gs.end_time)) as times
+		from game_session as gs
+		where gs.completed = 1
+		order by  guesses, times;
+END; $$
 DELIMITER ;
 call ranking();
 
@@ -64,3 +74,4 @@ CREATE
 	STARTS TIMESTAMP(NOW() + INTERVAL 1 MINUTE)
 	DO
 		CALL ranking();
+
