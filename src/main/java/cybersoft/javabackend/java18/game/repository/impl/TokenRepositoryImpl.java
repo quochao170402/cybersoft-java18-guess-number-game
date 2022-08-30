@@ -14,7 +14,7 @@ public class TokenRepositoryImpl extends AbstractRepository<Token> implements To
 
     }
 
-    public static TokenRepository getRepository() {
+    public static TokenRepository getInstance() {
         if (repository == null) repository = new TokenRepositoryImpl();
         return repository;
     }
@@ -75,8 +75,8 @@ public class TokenRepositoryImpl extends AbstractRepository<Token> implements To
     }
 
     @Override
-    public void deleteToken(String selector) {
-        executeUpdate(connection -> {
+    public boolean deleteToken(String selector) {
+        return executeUpdate(connection -> {
             String query = """
                     delete from token
                     where selector = ?;
@@ -85,6 +85,6 @@ public class TokenRepositoryImpl extends AbstractRepository<Token> implements To
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, selector);
             return statement.executeUpdate();
-        });
+        }) != 0;
     }
 }

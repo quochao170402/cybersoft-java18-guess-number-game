@@ -27,7 +27,7 @@ public class AuthFilter implements Filter {
     public void init(FilterConfig filterConfig) throws ServletException {
         Filter.super.init(filterConfig);
         tokenHelper = TokenHelper.getInstance();
-        authService = AuthServiceImpl.getService();
+        authService = AuthServiceImpl.getInstance();
     }
 
     @Override
@@ -54,7 +54,7 @@ public class AuthFilter implements Filter {
             return false;
         }
 
-        Player player = authService.findByUsername(token.getUsername());
+        Player player = authService.findPlayerByUsername(token.getUsername());
         req.getSession().setAttribute("currentUser", player);
 
         token = tokenHelper.resetToken(token.getSelector());

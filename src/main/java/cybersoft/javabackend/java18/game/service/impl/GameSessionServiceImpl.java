@@ -18,12 +18,12 @@ public class GameSessionServiceImpl implements GameSessionService {
     private int indexId;
 
     private GameSessionServiceImpl() {
-        this.gameSessionRepository = GameSessionRepositoryImpl.getRepository();
-        this.guessRepository = GuessRepositoryImpl.getRepository();
+        this.gameSessionRepository = GameSessionRepositoryImpl.getInstance();
+        this.guessRepository = GuessRepositoryImpl.getInstance();
         indexId = gameSessionRepository.countGames() + 1;
     }
 
-    public static GameSessionService getService() {
+    public static GameSessionService getInstance() {
         if (gameSessionService == null) gameSessionService = new GameSessionServiceImpl();
         return gameSessionService;
     }

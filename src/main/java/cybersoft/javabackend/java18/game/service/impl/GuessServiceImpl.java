@@ -17,11 +17,11 @@ public class GuessServiceImpl implements GuessService {
     private final GameSessionRepository gameSessionRepository;
 
     private GuessServiceImpl() {
-        guessRepository = GuessRepositoryImpl.getRepository();
-        gameSessionRepository = GameSessionRepositoryImpl.getRepository();
+        guessRepository = GuessRepositoryImpl.getInstance();
+        gameSessionRepository = GameSessionRepositoryImpl.getInstance();
     }
 
-    public static GuessService getService() {
+    public static GuessService getInstance() {
         if (guessService == null) guessService = new GuessServiceImpl();
         return guessService;
     }

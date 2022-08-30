@@ -18,7 +18,7 @@ public class PlayerRepositoryImpl extends AbstractRepository<Player> implements 
         mapper = new PlayerMapper();
     }
 
-    public static PlayerRepository getRepository() {
+    public static PlayerRepository getInstance() {
         if (repository == null) repository = new PlayerRepositoryImpl();
         return repository;
     }

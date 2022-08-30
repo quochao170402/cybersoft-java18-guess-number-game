@@ -26,7 +26,7 @@ public class GameSessionRepositoryImpl extends AbstractRepository<GameSession> i
         mapper = new GameSessionMapper();
     }
 
-    public static GameSessionRepository getRepository() {
+    public static GameSessionRepository getInstance() {
         if (repository == null) repository = new GameSessionRepositoryImpl();
         return repository;
     }

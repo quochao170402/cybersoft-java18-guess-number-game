@@ -25,7 +25,7 @@ public class GuessRepositoryImpl extends AbstractRepository<Guess> implements Gu
         mapper = new GuessMapper();
     }
 
-    public static GuessRepository getRepository() {
+    public static GuessRepository getInstance() {
         if (repository == null) repository = new GuessRepositoryImpl();
         return repository;
     }

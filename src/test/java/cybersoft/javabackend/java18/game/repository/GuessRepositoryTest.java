@@ -14,7 +14,7 @@ public class GuessRepositoryTest {
 
     @BeforeAll
     void setup() {
-        repository = GuessRepositoryImpl.getRepository();
+        repository = GuessRepositoryImpl.getInstance();
     }
 
     @Test

@@ -21,11 +21,13 @@ import java.io.IOException;
 public class AuthServlet extends HttpServlet {
 
     private AuthService authService = null;
+    private TokenHelper tokenHelper = null;
 
     @Override
     public void init() throws ServletException {
         super.init();
-        authService = AuthServiceImpl.getService();
+        authService = AuthServiceImpl.getInstance();
+        tokenHelper = TokenHelper.getInstance();
     }
 
     @Override
@@ -53,27 +55,6 @@ public class AuthServlet extends HttpServlet {
         }
     }
 
-    private void processLogout(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        String selector = "";
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("selector")) {
-                selector = cookie.getValue();
-                break;
-            }
-        }
-
-        if (!"".equals(selector)) {
-            authService.deleteToken(selector);
-
-            Cookie cookieSelector = new Cookie("selector", "");
-            cookieSelector.setMaxAge(0);
-            Cookie cookieValidator = new Cookie("selector", "");
-            cookieValidator.setMaxAge(0);
-        }
-
-        request.getSession().invalidate();
-    }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -137,6 +118,28 @@ public class AuthServlet extends HttpServlet {
             request.setAttribute("errors", "Thông tin người chơi không hợp lệ hoặc đã được sử dụng");
             request.getRequestDispatcher(JspUtils.REGISTER).forward(request, response);
         }
+    }
+
+    private void processLogout(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        String selector = "";
+        for (Cookie cookie : cookies) {
+            if (cookie.getName().equals("selector")) {
+                selector = cookie.getValue();
+                break;
+            }
+        }
+
+        if (!"".equals(selector)) {
+            tokenHelper.deleteToken(selector);
+
+            Cookie cookieSelector = new Cookie("selector", "");
+            cookieSelector.setMaxAge(0);
+            Cookie cookieValidator = new Cookie("selector", "");
+            cookieValidator.setMaxAge(0);
+        }
+
+        request.getSession().invalidate();
     }
 
 }

@@ -13,7 +13,7 @@ public class GameSessionRepositoryTest {
 
     @BeforeAll
     void setup() {
-        repository = GameSessionRepositoryImpl.getRepository();
+        repository = GameSessionRepositoryImpl.getInstance();
     }
 
     @Test

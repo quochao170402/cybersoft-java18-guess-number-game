@@ -33,8 +33,8 @@ public class AccountServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         super.init();
-        gameSessionService = GameSessionServiceImpl.getService();
-        guessService = GuessServiceImpl.getService();
+        gameSessionService = GameSessionServiceImpl.getInstance();
+        guessService = GuessServiceImpl.getInstance();
     }
 
     @Override
@@ -106,6 +106,7 @@ public class AccountServlet extends HttpServlet {
         }
     }
 
+    // View all player's games
     private void processListGame(HttpServletRequest request, HttpServletResponse response, int page)
             throws ServletException, IOException {
         Player player = (Player) request.getSession().getAttribute("currentUser");
@@ -113,9 +114,7 @@ public class AccountServlet extends HttpServlet {
                 .findGamesByUsernameWithPagination(player.getUsername(), page);
         int totalPage = (int) Math.ceil(
                 gameSessionService.countGamesByUsername(
-                        player.getUsername())
-                        /
-                        (JspUtils.DEFAULT_PAGE_SIZE * 1.0));
+                        player.getUsername()) / (JspUtils.DEFAULT_PAGE_SIZE * 1.0));
 
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPage", totalPage);
@@ -124,6 +123,7 @@ public class AccountServlet extends HttpServlet {
         request.getRequestDispatcher(JspUtils.LIST_GAME).forward(request, response);
     }
 
+    // Continue a game
     private void processContinueGame(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String id = request.getParameter("game-id");
@@ -135,6 +135,7 @@ public class AccountServlet extends HttpServlet {
         request.getRequestDispatcher(JspUtils.GAME).forward(request, response);
     }
 
+    // View all guesses of a game
     private void processViewGame(HttpServletRequest request, HttpServletResponse response, int page) throws ServletException, IOException {
         String gameId = request.getParameter("game-id");
         List<Guess> guesses = guessService.findGuessesByGameIdWithPagination(gameId, page);
@@ -152,6 +153,7 @@ public class AccountServlet extends HttpServlet {
     }
 
 
+    // Activate or Deactivate a game
     private void setActiveGame(HttpServletRequest request, HttpServletResponse response, boolean active)
             throws IOException {
         String gameId = request.getParameter("game-id");

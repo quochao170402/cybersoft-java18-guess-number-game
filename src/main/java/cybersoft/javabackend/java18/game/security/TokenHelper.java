@@ -1,7 +1,7 @@
 package cybersoft.javabackend.java18.game.security;
 
-import cybersoft.javabackend.java18.game.service.AuthService;
-import cybersoft.javabackend.java18.game.service.impl.AuthServiceImpl;
+import cybersoft.javabackend.java18.game.service.TokenService;
+import cybersoft.javabackend.java18.game.service.impl.TokenServiceImpl;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -10,11 +10,11 @@ import java.util.UUID;
 
 public class TokenHelper {
     private static TokenHelper instance = null;
-    private final AuthService authService;
+    private final TokenService tokenService;
 
 
     private TokenHelper() {
-        authService = AuthServiceImpl.getService();
+        tokenService = TokenServiceImpl.getInstance();
     }
 
     public static TokenHelper getInstance() {
@@ -33,12 +33,12 @@ public class TokenHelper {
                 validator = cookie.getValue();
             }
         }
-
+        System.out.println(selector + " " + validator);
         if (selector == null || validator == null) {
             return null;
         }
 
-        Token token = authService.getToken(selector);
+        Token token = tokenService.getToken(selector);
 
         if (token == null) return null;
 
@@ -63,7 +63,7 @@ public class TokenHelper {
         String selector = UUID.randomUUID().toString();
         String validator = UUID.randomUUID().toString();
         Token newToken = new Token(selector, validator, username);
-        if (authService.saveToken(newToken)) {
+        if (tokenService.saveToken(newToken)) {
             return newToken;
         }
         return null;
@@ -71,6 +71,10 @@ public class TokenHelper {
 
     public Token resetToken(String selector) {
         String validator = UUID.randomUUID().toString();
-        return authService.resetToken(selector, validator);
+        return tokenService.resetToken(selector, validator);
+    }
+
+    public boolean deleteToken(String selector) {
+        return tokenService.deleteToken(selector);
     }
 }

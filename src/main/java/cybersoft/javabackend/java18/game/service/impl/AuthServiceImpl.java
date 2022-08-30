@@ -5,7 +5,6 @@ import cybersoft.javabackend.java18.game.repository.PlayerRepository;
 import cybersoft.javabackend.java18.game.repository.TokenRepository;
 import cybersoft.javabackend.java18.game.repository.impl.PlayerRepositoryImpl;
 import cybersoft.javabackend.java18.game.repository.impl.TokenRepositoryImpl;
-import cybersoft.javabackend.java18.game.security.Token;
 import cybersoft.javabackend.java18.game.service.AuthService;
 
 public class AuthServiceImpl implements AuthService {
@@ -15,11 +14,11 @@ public class AuthServiceImpl implements AuthService {
     private final TokenRepository tokenRepository;
 
     private AuthServiceImpl() {
-        this.playerRepository = PlayerRepositoryImpl.getRepository();
-        this.tokenRepository = TokenRepositoryImpl.getRepository();
+        this.playerRepository = PlayerRepositoryImpl.getInstance();
+        this.tokenRepository = TokenRepositoryImpl.getInstance();
     }
 
-    public static AuthService getService() {
+    public static AuthService getInstance() {
         if (authService == null) authService = new AuthServiceImpl();
         return authService;
     }
@@ -77,30 +76,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public Player findByUsername(String username) {
+    public Player findPlayerByUsername(String username) {
         return playerRepository.findByUsername(username);
-    }
-
-    @Override
-    public boolean saveToken(Token token) {
-        return tokenRepository.insert(token);
-    }
-
-    @Override
-    public void deleteToken(String selector) {
-        tokenRepository.deleteToken(selector);
-    }
-
-    @Override
-    public Token getToken(String selector) {
-        return tokenRepository.getToken(selector);
-    }
-
-    @Override
-    public Token resetToken(String selector, String validator) {
-        if (tokenRepository.resetToken(selector, validator)) {
-            return getToken(selector);
-        }
-        return null;
     }
 }

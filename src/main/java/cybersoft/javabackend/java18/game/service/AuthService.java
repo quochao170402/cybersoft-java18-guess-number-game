@@ -1,7 +1,6 @@
 package cybersoft.javabackend.java18.game.service;
 
 import cybersoft.javabackend.java18.game.model.Player;
-import cybersoft.javabackend.java18.game.security.Token;
 
 public interface AuthService {
 
@@ -24,13 +23,6 @@ public interface AuthService {
      */
     Player register(String username, String password, String name);
 
-    Player findByUsername(String username);
 
-    void deleteToken(String selector);
-
-    boolean saveToken(Token token);
-
-    Token getToken(String selector);
-
-    Token resetToken(String selector, String validator);
+    Player findPlayerByUsername(String username);
 }

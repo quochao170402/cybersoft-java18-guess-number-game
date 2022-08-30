@@ -31,8 +31,8 @@ public class GameServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         super.init();
-        gameSessionService = GameSessionServiceImpl.getService();
-        guessService = GuessServiceImpl.getService();
+        gameSessionService = GameSessionServiceImpl.getInstance();
+        guessService = GuessServiceImpl.getInstance();
     }
 
     @Override
@@ -82,7 +82,8 @@ public class GameServlet extends HttpServlet {
     }
 
     // Load current game or create new game
-    private void loadGame(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void loadGame(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         GameSession currentGame = getCurrentGameFromRequest(request);
         request.setAttribute("game", currentGame);
         request.getRequestDispatcher(JspUtils.GAME).forward(request, response);
@@ -95,7 +96,8 @@ public class GameServlet extends HttpServlet {
     }
 
 
-    private void processGame(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void processGame(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         // get current player from request and player's active game in database
         GameSession currentGame = getCurrentGameFromRequest(request);
 
@@ -109,9 +111,8 @@ public class GameServlet extends HttpServlet {
         request.getRequestDispatcher(JspUtils.GAME).forward(request, response);
     }
 
-    // Get current game session, then deactivate it and create new game session. After set new game to request
     private void processNewGame(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // get current game
+        // get current player
         Player currentPlayer = (Player) request.getSession().getAttribute("currentUser");
 
         // create new game
@@ -123,12 +124,12 @@ public class GameServlet extends HttpServlet {
 
     private void processRanking(HttpServletRequest request, HttpServletResponse response, int page) throws ServletException, IOException {
         // get sorted game list
-        List<GameSession> sessions = gameSessionService.rankingWithPagination(page);
+        List<GameSession> rank = gameSessionService.rankingWithPagination(page);
         int totalPage = (int) Math.ceil(gameSessionService.getSizeOfRank() / (JspUtils.DEFAULT_PAGE_SIZE * 1.0));
 
         request.setAttribute("totalPage", totalPage);
         request.setAttribute("currentPage", page);
-        request.setAttribute("games", sessions);
+        request.setAttribute("games", rank);
         request.getRequestDispatcher(JspUtils.RANK).forward(request, response);
     }
 }
